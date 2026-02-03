@@ -12,10 +12,7 @@ from .models import (
 
 User = get_user_model()
 
-
-# ────────────────────────────────────────────────
 # User Serializers
-# ────────────────────────────────────────────────
 
 class UserReadSerializer(serializers.ModelSerializer):
     class Meta:
@@ -75,9 +72,7 @@ class EmployerRegistrationSerializer(UserRegistrationSerializer):
         return user
 
 
-# ────────────────────────────────────────────────
 # Child Model Serializers
-# ────────────────────────────────────────────────
 
 class EducationEntrySerializer(serializers.ModelSerializer):
     class Meta:
@@ -168,9 +163,7 @@ class CertificationSerializer(serializers.ModelSerializer):
         return obj.certificate_file.url if obj.certificate_file else None
 
 
-# ────────────────────────────────────────────────
 # Profile Serializers
-# ────────────────────────────────────────────────
 
 class JobSeekerProfileReadSerializer(serializers.ModelSerializer):
     user = UserReadSerializer(read_only=True)
@@ -247,75 +240,48 @@ class AdminProfileWriteSerializer(serializers.ModelSerializer):
         exclude = ['id', 'user', 'created_at', 'updated_at']
 
 
-# ────────────────────────────────────────────────
-# Company & Job Serializers
-# ────────────────────────────────────────────────
+
+# Company & Job Serializers 
+
 
 class CompanySerializer(serializers.ModelSerializer):
-    companyName = serializers.CharField(source='name')
-    companyId = serializers.CharField(source='id', read_only=True)
-    TopCompany = serializers.SerializerMethodField(read_only=True)
+    name = serializers.CharField()  # matches model
     logo_url = serializers.SerializerMethodField(read_only=True)
-    reviewNo = serializers.IntegerField(source='review_count', read_only=True)
+    review_count = serializers.IntegerField(read_only=True)  # matches model
 
     class Meta:
         model = Company
         fields = [
-            'companyId', 'companyName', 'logo', 'logo_url',
-            'TopCompany', 'slogan', 'ratings', 'reviewNo',
+            'id', 'name', 'logo', 'logo_url',
+            'rating', 'review_count',
             'description', 'website'
         ]
 
     def get_logo_url(self, obj):
         return obj.logo.url if obj.logo else ""
 
-    def get_TopCompany(self, obj):
-        return obj.rating >= 4.0  # Customize as needed
-
 
 class JobReadSerializer(serializers.ModelSerializer):
     company = CompanySerializer(read_only=True)
-    companyId = serializers.CharField(source='company.id', read_only=True)
-    logo = serializers.ImageField(source='company.logo', read_only=True)
-    PostedBy = serializers.CharField(source='posted_by.username', default='Company Jobs', read_only=True)
-    IndustryType = serializers.JSONField(source='industry_type')
-    Department = serializers.JSONField(source='department')
-    WorkType = serializers.CharField(source='work_type')
-    ratings = serializers.FloatField(source='company.rating', read_only=True)
-    reviewNo = serializers.IntegerField(source='company.review_count', read_only=True)
-    applicants = serializers.IntegerField(source='applicants_count', read_only=True)
-    JobHighlights = serializers.JSONField(source='job_highlights', default=list)
-    companyOverview = serializers.CharField(source='company.description', default='', read_only=True)
-    jobDescription = serializers.CharField(source='description')
-    Responsibilities = serializers.JSONField(source='responsibilities', default=list)
-    EducationRequired = serializers.JSONField(source='education_required', default=list)
-    KeySkills = serializers.JSONField(source='key_skills', default=list)
+    posted_by = serializers.CharField(source='posted_by.username', read_only=True, default='Company Jobs')
+    industry_type = serializers.JSONField()
+    department = serializers.JSONField()
+    work_type = serializers.CharField()
+    applicants_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Job
         fields = [
-            'id', 'title', 'company', 'companyId', 'logo', 'posted', 'PostedBy',
-            'IndustryType', 'Department', 'WorkType', 'shift', 'duration',
-            'ratings', 'reviewNo', 'salary', 'experience_required', 'location',
-            'openings', 'applicants', 'tags', 'EducationRequired', 'KeySkills',
-            'JobHighlights', 'companyOverview', 'jobDescription', 'Responsibilities'
+            'id', 'title', 'company', 'location',
+            'job_type', 'industry_type', 'experience_required', 'work_type',
+            'salary', 'description', 'responsibilities', 'key_skills',
+            'education_required', 'tags', 'department', 'shift', 'duration',
+            'openings', 'applicants_count', 'posted_date', 'posted_by'
         ]
 
 
 class JobWriteSerializer(serializers.ModelSerializer):
-    companyName = serializers.CharField(write_only=True, required=False)
-    companyId = serializers.CharField(write_only=True, required=False)
-    logo = serializers.ImageField(source='company.logo', write_only=True, required=False)
-
-    IndustryType = serializers.JSONField(source='industry_type', write_only=True)
-    Department = serializers.JSONField(source='department', write_only=True)
-    WorkType = serializers.CharField(source='work_type', write_only=True)
-    JobHighlights = serializers.JSONField(source='job_highlights', write_only=True)
-    companyOverview = serializers.CharField(source='company.description', write_only=True, required=False)
-    jobDescription = serializers.CharField(source='description', write_only=True)
-    Responsibilities = serializers.JSONField(source='responsibilities', write_only=True)
-    EducationRequired = serializers.JSONField(source='education_required', write_only=True)
-    KeySkills = serializers.JSONField(source='key_skills', write_only=True)
+    company = serializers.PrimaryKeyRelatedField(queryset=Company.objects.all(), required=False)
 
     class Meta:
         model = Job
@@ -323,33 +289,14 @@ class JobWriteSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'posted_date', 'posted_by', 'applicants_count']
 
     def validate(self, data):
-        if not data.get('company') and not (data.get('companyName') or data.get('companyId')):
-            raise serializers.ValidationError({"companyName": "Company name or company ID is required."})
+        if not data.get('company'):
+            raise serializers.ValidationError({"company": "Company is required."})
         return data
 
-    def create(self, validated_data):
-        company_name = validated_data.pop('companyName', None)
-        company_id = validated_data.pop('companyId', None)
-        logo = validated_data.pop('logo', None)
-
-        company = None
-        if company_name or company_id:
-            company, _ = Company.objects.get_or_create(
-                name=company_name or company_id,
-                defaults={
-                    'description': validated_data.pop('companyOverview', ''),
-                    'logo': logo,
-                }
-            )
-
-        validated_data['company'] = company
-        validated_data['posted_by'] = self.context['request'].user
-        return super().create(validated_data)
 
 
-# ────────────────────────────────────────────────
 # Job Application & Saved Job
-# ────────────────────────────────────────────────
+
 
 class JobApplicationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -365,9 +312,9 @@ class SavedJobSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'saved_date', 'user']
 
 
-# ────────────────────────────────────────────────
+
 # Other Models
-# ────────────────────────────────────────────────
+
 
 class NewsletterSubscriberSerializer(serializers.ModelSerializer):
     class Meta:

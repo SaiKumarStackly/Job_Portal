@@ -13,7 +13,7 @@ from .serializers import (
     JobSeekerProfileWriteSerializer,
     EmployerProfileReadSerializer,
     EmployerProfileWriteSerializer,
-    UserReadSerializer  # Changed to UserReadSerializer to match your file
+    UserReadSerializer  
 )
 
 
@@ -26,7 +26,7 @@ class JobSeekerRegistrationView(APIView):
             user = serializer.save()
             return Response({
                 "message": "Jobseeker registered successfully",
-                "user": UserReadSerializer(user).data  # Changed to UserReadSerializer
+                "user": UserReadSerializer(user).data  
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -40,7 +40,7 @@ class EmployerRegistrationView(APIView):
             user = serializer.save()
             return Response({
                 "message": "Employer registered successfully",
-                "user": UserReadSerializer(user).data  # Changed to UserReadSerializer
+                "user": UserReadSerializer(user).data  
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
