@@ -1,0 +1,38 @@
+.applied-app-status-container{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.applied-dis-btn {
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 16px;
+  background-color: #1E88E580;
+  border-color: #1E88E580;
+  cursor: not-allowed;
+}
+
+.applied-application-status {
+  font-size: 15px;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.status-progress {
+  background-color: #FFC107;
+  color: #032240;
+}
+
+.status-reviewing {
+  background-color: #E1BEE7;
+  color: #032240;
+}
+
+.status-done {
+  background-color: #4CAF50;
+  color: #FFFFFF;
+}

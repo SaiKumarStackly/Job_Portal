@@ -1,0 +1,74 @@
+.avatar-container {
+  position: relative;
+  display: inline-block;
+}
+
+.avatar-icon {    
+  height: 30px;
+  cursor: pointer;
+  padding: 5px;   
+}
+
+.menu-icon {
+  width: 20px;   
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.avatar-menu {
+  position: absolute;
+  right: 0;
+  top: 90px;
+  background: #ffffff;
+  width: 230px;
+  border-radius: 16px;
+  padding: 8px 0;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.12);
+  z-index: 999;
+  animation: fadeIn 0.2s ease-out;
+  box-sizing: border-box;   
+  overflow: hidden;         
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  font-size: 15px;
+  color: #213766;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+  box-sizing: border-box;    
+}
+
+.menu-item:hover {
+  background: #f5f7fb;
+}
+
+.menu-divider {
+  height: 1px;
+  background: #e9e9e9;
+  margin: 10px 0;
+}
+
+.avatar-logout-btn {
+  color: #0066ff;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: center;
+  padding: 12px 0;
+  font-size: 15px;
+  cursor: pointer;
+  display: block;
+  margin: 0 auto;
+  font-weight: 700;           
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}

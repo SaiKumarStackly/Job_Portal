@@ -1,0 +1,233 @@
+.notifications-container {
+    width: 500px;
+    height: fit-content;
+    background-color: #ffffff;
+    border-radius: 30px 0 0 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    color: #333;
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease-in-out, opacity 0.1s ease-in-out;
+}
+
+.show-notification {
+    transform: translateX(0);
+    opacity: 1;
+    visibility: visible;
+}
+
+.hide-notification {
+    transform: translateX(100%);
+    opacity: 0;
+    visibility: hidden;
+}
+
+.notifications-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    height: 45px;
+}
+
+.notifications-heading-container {
+    display: flex;
+    align-items: center;
+}
+
+.notification-header-icons {
+    height: 21px;
+    margin-right: 10px;
+    margin-top: 3px;
+}
+
+.notifications-header h2 {
+    margin: 0;
+    font-size: 21px;
+    font-weight: 600;
+    color: #032240;
+}
+
+.notifications-close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #555;
+    padding: 0;
+    line-height: 1;
+}
+
+.notifications-subheader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 25px;
+    font-size: 16px;
+    border-top: 1px solid rgba(224, 224, 224, 1);
+    height: 50px;
+    color: #032240;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.new-notifications-count {
+    background-color: #FFFFFF;
+    color: #1E88E5;
+    padding: 6px 9px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-left: 12px;
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+}
+
+.clear-all-btn {
+    background: none;
+    border: none;
+    color: #032240;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.notifications-list {
+    max-height: 500px;
+    overflow-y: auto;
+    border-bottom: 1px solid rgba(224, 224, 224, 1);
+}
+
+.notification-new-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(224, 224, 224, 1);
+    cursor: pointer;
+    height: 50px;
+}
+
+.notification-old-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(224, 224, 224, 1);
+    cursor: pointer;
+    height: 50px;
+    background-color: #f8f3f3;
+}
+
+.notification-old-item:last-child .overflow-menu {
+    transform: translate(0, -120px);
+}
+
+.notification-content {
+    flex-grow: 1;
+    margin-right: 16px;
+}
+
+.notification-text {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #032240;
+    line-height: 1.4;
+    font-weight: 500;
+}
+
+.notification-time {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: #888;
+}
+
+/* New wrapper to contain the button and the menu for correct positioning */
+.more-options-wrapper {
+    position: relative; /* Crucial for absolutely positioning the menu */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px; /* Added padding to give the button a larger clickable area */
+}
+
+.more-options-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    color: #000000;
+    cursor: pointer;
+    line-height: 1; /* Helps center the three dots vertically */
+    padding: 5px; /* Added padding for easier tapping/clicking */
+}
+
+/* Styles for the Overflow Menu */
+.overflow-menu {
+    position: absolute;
+    top: 100%; /* Position below the three-dot button */
+    right: 0;
+    /* Adjustments to make it look like the provided image */
+    width: 150px; 
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px; /* Slightly rounded corners */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1010; /* Higher than the main notification container's z-index */
+    overflow: hidden; /* To contain the border-radius within the menu */
+}
+
+.menu-item {
+    display: block;
+    width: 100%;
+    padding: 10px 15px;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.menu-item:hover {
+    background-color: #f0f0f0;
+}
+
+.delete-item {
+    color: #e53935; 
+}
+
+.notification-new-item, .notification-old-item {
+    /* Set alignment and height as before */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(224, 224, 224, 1);
+    cursor: pointer;
+    height: 60px; 
+    /* Ensure a clear visual separation, and align items correctly */
+}
+
+.overflow-menu .menu-item:first-child {
+    border-bottom: 1px solid #eee; /* A subtle light grey line */
+}
+
+.notifications-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.notifications-list::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 3px;
+}
+
+.notifications-list::-webkit-scrollbar-track {
+    background-color: #f1f1f1;
+}

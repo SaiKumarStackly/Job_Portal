@@ -1,0 +1,170 @@
+.AboutusHeaderContainer{
+    margin: 150px 60px 20px 60px;
+    font-size: 24px;
+    padding-left: 60px;
+}
+.AboutusHeaderSpan{
+    color: #1E88E5;   
+}
+.Aboutus-Mainsec{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.16);
+    margin: 100px 60px 0px 60px;
+    padding: 5px;
+    justify-content: space-around;
+    gap: 20px;
+    border-radius: 10px;
+}
+.Aboutus-Desc-Container{
+    /* background-color: pink; */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* flex-grow: 1; */
+    padding: 5px 5px;  
+    margin-left: 60px; 
+    /* background-color: beige; */
+}
+.Aboutus-Desc-Container h1{
+    margin-bottom: 50px;
+}
+
+.Aboutus-Desc-Container p{
+    font-size: 22px;
+    font-weight: 500;
+    margin-top: -7px;
+    text-align: justify;
+}
+
+.Aboutus-Image-Container{
+    /* background-color: rebeccapurple; */
+    display: flex;
+    justify-content: flex-end;
+    /* padding: 10px; */
+}
+.Aboutus-Images{
+    /* background-color: blue; */
+    width: 500px;
+    margin-left: 115px;
+    /* border-radius: 50px; */
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    
+}
+
+
+.Aboutus-Types{
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    margin: 30px 60px 0px 60px;
+    padding: 25px;
+    justify-items: center;
+    justify-content: center;
+    
+}
+.Aboutus-types-Images{
+    width: 250px;
+    height: 200px;
+}
+.Aboutus-Mid-Images{
+    height: 250px;  
+    width: 250px;
+    /* border: 1px solid red; */
+} 
+.Aboutus-TypeDesc{
+    width: 300px;
+    margin-top: 20px;
+    padding: 10px;
+    /* border: 1px solid black; */
+}
+.Aboutus-TypeDesc h4{
+    text-align: center;
+    margin-top: 50px;
+    font-size: larger;
+   
+} 
+.Aboutus-TypeDesc p{
+    font-weight: 300;
+} 
+
+.Aboutus-Midsec{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.16);
+    margin: 100px 60px 0px 60px;
+    /* background-color: red; */
+    padding: 12px;
+    gap: 20px;
+    border-radius: 7px;
+}
+.Aboutus-Midsec-Desc-Container{
+    /* background-color: pink; */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* flex-grow: 1; */
+    /* padding: 5px; */
+    border-radius: 7px;
+    padding-right: 25px;
+    
+}
+.Aboutus-Midsec-Desc-Container h1{
+    margin-bottom: 50px;
+    text-align: end;
+    /* padding-right:20px; */
+    
+
+}
+
+.Aboutus-Midsec-Desc-Container p{
+    font-size: 22px;
+    font-weight: 500;
+    margin-top: -10px;
+    text-align: end;
+
+}
+.Aboutus-midseccontent{
+    width: 520px;
+    height:350px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.Aboutus-Midsec-Images{
+    /* background-color: blue; */
+    width: 500px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    
+    
+} 
+.Aboutus-final-part{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    justify-items: center;
+    box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.16);
+    margin: 150px 60px 20px 60px;
+    padding: 40px;
+    font-size: 24px;
+    font-weight: 500;
+    border-radius: 10px;
+}
+.Aboutus-final-Desc-Container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 50px;
+    line-height: 1.25;
+    
+} 
+.Aboutus-final-Desc-Container p{
+    text-align: justify;
+    font-size: 22px;
+}
+.Aboutus-Success-Images{
+    width:700px;
+}

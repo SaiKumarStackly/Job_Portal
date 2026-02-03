@@ -1,0 +1,31 @@
+.works-section {
+    background-color: #E9F3FC;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.work-heading{
+    font-size: 40px;
+    margin-top: 40px;
+}
+
+.infocard-section {
+    display: flex;
+    gap: 10rem;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+@media screen and (max-width: 768px) {
+  .infocard-section{
+    gap: 2rem; 
+    justify-content: center; 
+  }
+
+  .work-heading {
+    font-size: 28px; 
+    text-align: center;
+  }
+}

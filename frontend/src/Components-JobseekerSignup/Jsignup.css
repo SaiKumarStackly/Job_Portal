@@ -1,0 +1,132 @@
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+}
+
+.j-sign-up-page {
+  background: #ffffff;
+  min-height: 100vh;
+}
+
+.j-sign-up-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 30px 60px;
+  align-items: center;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.j-sign-up-header-links {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.signup-illustration img{
+  height: 560px;
+  margin-left: 100px;
+}
+
+.j-sign-up-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 40px 60px;
+}
+
+.j-sign-up-form {
+  max-width: 500px;
+  width: 100%;
+  background: #fff;
+  padding: 20px 0;
+  margin-right: 100px;
+  transform: translateY(-15px); 
+}
+
+.j-sign-up-form h2 {
+  text-align: center;
+  font-size: 32px;
+  margin-bottom: 25px;
+  color: #032240;
+}
+
+.j-sign-up-form label {
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 15px;
+  display: block;
+  color: #032240;
+}
+
+.j-sign-up-form input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.j-sign-up-submit {
+  margin-top: 20px;
+  width: 105%;
+  padding: 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+@media screen and (max-width: 768px) {
+ 
+  .j-sign-up-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+  }
+ 
+  .j-sign-up-header .no-account,
+  .j-sign-up-header .employer-redirect-link,
+  .j-sign-up-header .separator {
+    display: none;
+  }
+ 
+  .j-sign-up-body {
+    flex-direction: column;
+    padding: 30px 30px;
+  }
+
+  .j-sign-up-header-links {
+    width: auto;
+  }
+
+  .j-sign-up-form {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  .j-sign-up-form h2 {
+    font-size: 28px;
+    text-align: center;
+    margin-bottom: 24px;
+    padding: 20px;
+  }
+ 
+  .j-sign-up-header .signup-btn {
+    display: inline-flex;
+    white-space: nowrap;
+  }
+
+  .signup-illustration {
+    display: none;
+  }
+}

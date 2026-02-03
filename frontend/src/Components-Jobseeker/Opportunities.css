@@ -1,0 +1,39 @@
+.Opportunities-section {
+  text-align: center;
+  padding: 20px;
+  background-color: white;
+}
+
+.Opportunities-title {
+  font-size: 40px;
+  font-weight: 600;
+  margin-bottom: 50px;
+}
+
+.Opportunities-job-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  justify-items: center;
+  margin-top: 40px;
+  margin-left: 125px;
+  margin-right: 145px;
+}
+
+.Opportunities-view-more-btn {
+  margin-top: 60px;
+  margin-bottom: 30px;
+  border: 1px solid #1E88E5;
+  background: white;
+  color: #1E88E5;
+  padding: 16px 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 17px;
+  font-weight: bold;
+}
+
+.Opportunities-view-more-btn:hover {
+  background: #1E88E5;
+  color: #fff;
+}

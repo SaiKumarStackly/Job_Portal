@@ -1,0 +1,101 @@
+.companies-tab-container {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  background-color: #fff;
+  max-width: 80rem;
+  margin: 0 auto 4rem;
+}
+
+.companies-tab-header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.companies-tab-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; 
+  gap: 40px;
+}
+
+.companies-tab-card {
+  background-color: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.companies-tab-logo-container {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.companies-tab-logo {
+  max-width: 60px;
+  max-height: 60px;
+  object-fit: contain;
+}
+
+.companies-tab-name {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.companies-tab-rating-reviews {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #032240;
+  margin-bottom: 10px;
+}
+
+.companies-tab-rating-star {
+  margin-right: 5px;
+}
+
+.companies-tab-separator {
+  margin: 0 5px;
+  color: #ccc;
+}
+
+.companies-tab-desc {
+  font-size: 17px;
+  color: #032240;
+  margin-bottom: 15px;
+  min-height: 40px; 
+}
+
+.companies-tab-view-jobs-btn {
+  background-color: #1E88E5;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+  width: 100%;
+}
+
+.companies-tab-view-jobs-btn:hover {
+  background-color: #0056b3;
+}
+
+.companies-tab-view-all-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 80px; 
+}

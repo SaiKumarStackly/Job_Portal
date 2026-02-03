@@ -1,0 +1,62 @@
+.myjobs-job-card {
+  background-color: #ffffff;
+  border: 1px solid #e0e6f1;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  height: min-content;
+}
+
+.myjobs-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.myjobs-job-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #032240;
+  margin: 0;
+}
+
+.menu-dots {
+  font-size: 22px;
+  font-weight: 600;
+  color: #032240;
+  cursor: pointer;
+}
+
+.myjobs-company-sub {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #343a40;
+  margin-bottom: 5px;
+}
+
+.myjobs-company-name {
+  font-size: 15px;
+  color: #032240;
+  margin: 0.25rem 0 0 0;
+}
+
+.myjobs-saved-date {
+  color: #032240;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.myjobs-btn {
+  background: #1E88E5;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+}
+

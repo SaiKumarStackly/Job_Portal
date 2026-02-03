@@ -1,0 +1,183 @@
+.header {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  padding: 20px 30px; 
+  background-color: #ffffff;
+  box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.12);
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  box-sizing: border-box;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  flex: 1; 
+  justify-content: flex-start; 
+}
+
+.logo {
+  font-size: 25px;
+  font-weight: bold;
+  color: #007bff;
+  text-decoration: none;
+  white-space: nowrap; 
+}
+
+.nav-links {
+  display: flex;
+  gap: 24px;
+  margin: 0; 
+  justify-content: center;
+}
+
+.nav-item {
+  text-decoration: none;
+  color: #032240;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.nav-item:hover {
+  background-color: #f0f4f8; 
+}
+
+.nav-active {
+  background-color: #E9F3FC;
+  color: #000;
+}
+
+.auth-links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1; 
+  justify-content: flex-end; 
+  margin: 0; 
+}
+
+.login-btn {
+  text-align: center;
+  padding: 8px 16px;
+  border: 1px solid #007bff;
+  color: #007bff;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 14px;
+  width: 50px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.signup-btn {
+  text-align: center;
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: #ffffff;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 14px;
+  width: 50px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.emp-log-link {
+  text-decoration: none;
+  color: #032240;
+  font-size: 16px; /* Adjusted to look balanced */
+  white-space: nowrap;
+}
+
+.separator {
+  width: 2px;
+  height: 24px;
+  background-color: #EDEDED;
+}
+
+.hamburger {
+  display: none; 
+  cursor: pointer;
+}
+
+@media screen and (max-width: 768px) {
+  
+  .header {
+    flex-direction: column;
+    padding: 15px 20px;
+    align-items: stretch;
+    height: auto;
+  }
+
+  .logo-container {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+
+  .hamburger {
+    display: block;
+    margin-left: auto;
+  }
+
+  .nav-links, 
+  .auth-links {
+    display: none; 
+    flex-direction: column;
+    width: 100%;
+    text-align: center;
+    gap: 15px;
+    margin: 0;
+    margin-top: 15px;
+  }
+
+  .nav-links.open, 
+  .auth-links.open {
+    display: flex;
+    animation: slideDown 0.3s ease-out;
+  }
+
+  .separator {
+    display: none; 
+  }
+
+  .login-btn, 
+  .signup-btn,
+  .emp-log-link {
+    width: 100%;
+    height: auto;
+    max-width: none;
+    
+    background-color: transparent;
+    border: none;
+    padding: 8px 12px;
+    
+    color: #032240; 
+    font-size: 16px; /* Match standard link size */
+    font-weight: 500;
+    text-decoration: none;
+    display: block; /* Ensure it takes full width of line */
+  }
+
+  /* Fix for signup specifically since it had white text on desktop */
+  .signup-btn {
+    color: #032240; 
+  }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -1,0 +1,27 @@
+.infocard{
+    background-color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 20px 30px 20px;
+    border-radius: 12px;
+    margin-bottom: 8rem;
+    width: 20rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.infocard>p{
+    color: gray;
+}
+
+.info-image{
+    width: 80px;
+}
+
+@media screen and (max-width: 768px) {
+  .infocard {
+    width: 100%; 
+    max-width: 320px; 
+    margin-bottom: 2rem; 
+  }
+}

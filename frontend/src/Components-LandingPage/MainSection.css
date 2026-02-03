@@ -1,0 +1,143 @@
+.main-section {
+  width: 100%;
+  background-color: #ffffff;
+  padding: 190px 20px 80px 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.headline {
+  font-size: 51px;
+  font-weight: 700;
+  color: #032240;
+  margin-bottom: 10px;
+}
+
+.subheading {
+  font-size: 16px;
+  color: #83858B;
+  margin-bottom: 30px;
+}
+
+.search-bar {
+  display: flex;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 16px;
+  padding: 16px;
+  background-color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.16);
+  min-width: 67%;
+  margin: 0 auto;
+}
+
+.search-field {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  border: none;
+  min-width: fit-content;
+  flex: 1 1 200px;
+  color: #B0B0B0;
+}
+
+.search-field input,
+.search-field select {
+  border: none;
+  outline: none;
+  font-size: 14px;
+  flex-grow: 1;
+  padding-left: 8px;
+  background-color: transparent;
+}
+
+.icon-size{
+  height: 24px;
+  margin-top: 2px;
+}
+
+.search-button {
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 18px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: #007bff 0.3s ease;
+}
+
+.search-button:hover {
+  background-color: #005ecf;
+}
+
+@media screen and (max-width: 768px) {
+  
+  .main-section {
+    padding: 80px 15px 40px 15px; 
+  }
+
+  .headline {
+    font-size: 28px; 
+    line-height: 1.2;
+    margin-bottom: 5px;
+  }
+  
+  .subheading {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  .search-bar {
+    flex-direction: column;   
+    width: 100%;              
+    max-width: 350px;         
+    padding: 15px;            
+    gap: 10px;                
+    box-sizing: border-box;
+    margin: 0 auto;  
+    height: 200px;         
+  }
+
+  .search-field {
+    width: 100%;
+    border-bottom: 1px solid #eee; 
+    padding: 5px 0;              
+  }
+
+  .search-field:last-of-type {
+    border-bottom: none;
+  }
+
+
+  .search-field input, 
+  .search-field select {
+    font-size: 14px;
+    height: 20px;   
+  }
+
+  .icon-size {
+    height: 18px; 
+    width: 18px;
+    margin-top: 0;
+  }
+
+  .search-bar .separator {
+    display: none;
+  }
+
+  .search-button {
+    width: 100%;
+    padding: 8px 0;
+    font-size: 16px;
+    margin-top: 5px;
+  }
+}

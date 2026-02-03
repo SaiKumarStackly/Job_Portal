@@ -1,0 +1,244 @@
+.search-result-title{
+    text-align: center;
+    margin: 15px 0;
+}
+.Mainsec-Search-Res{
+    display: grid; 
+    grid-template-columns: 30% 50%;
+    margin: 20px auto;
+    padding: 20px;
+    gap: 6.5rem;
+}
+.Aside{
+    padding: 20px;
+    height: max-content;
+    overflow-y: scroll;   
+    margin-left: 50px;  
+}
+.Aside::-webkit-scrollbar{
+    display: none;
+}
+
+.filter-applied{
+    color: #3b82f6;
+    font-weight: 700;
+    cursor: pointer;
+}
+.maincontent{
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
+    margin-left: 30px;
+}
+.jobs-card{
+    margin: 10px 20px;
+    padding: 0px 50px;
+}
+.aside-header{
+    display: flex;
+    justify-content: space-between;
+    margin: 0 20px;
+    padding: 0 20px;
+    border-bottom: 2px solid #777;
+}
+.Search-Worktype-Container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-left: 20px;
+    margin-left: 20px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid #999;
+  
+}
+
+.Search-Worktype-Container input{
+    margin-right: 10px;
+}
+.Search-Worktype-Container label{
+    color: #83858B;
+    font-weight: 500;
+}
+.Search-Worktype-Container h4{
+    color:#032240 ;
+}
+
+.viewmore-btn{
+    width: fit-content  ;
+    padding: 5px;
+    border-radius: 7px;
+    border: none;
+    outline: none;
+    background: none;
+    color: #3b82f6;
+    cursor: pointer;
+}
+.viewmore-cont{
+    display: flex;
+    margin-top: 15px;
+}
+.SortbySearch {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 20px;
+}
+ 
+.sort-wrapper {
+  position: relative;
+}
+.NoofJobsCont{
+    margin-left: 70px;
+}
+ 
+.Sortbutton {
+  padding: 6px 6px 5px 15px;
+  border-radius: 20px;
+  border: 1px solid #d0d5dd;
+  background-color: #ffffff;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+ 
+.Sortbutton:hover {
+  background-color: #f5f7fa;
+}
+ 
+.sort-dropdown {
+  position: absolute;
+  top: 42px;
+  right: 0;
+  width: 250px;
+  background-color: #ffffff;
+  border: 1px solid #e4e7ec;
+  border-radius: 10px;
+  box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  overflow: hidden;
+}
+ 
+.sort-dropdown div {
+  padding: 10px 85px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #0b0b0b;
+  border-bottom: 1px solid #e3e1e1;
+}
+.sort-dropdown div:last-child {
+  border-bottom: none;
+}
+.sort-dropdown div:hover {
+  background-color: #f5f7fa;
+}
+
+.range-container {
+    position: relative;
+    width: 100%;
+    height: 6px; 
+    margin: 30px 0 15px 0;
+    display: flex;
+    align-items: center;
+}
+
+.Single-slider,
+.slider {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 100%;
+    height: 6px !important; 
+    background: transparent;
+    outline: none;
+    border-radius: 10px;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+}
+
+.Single-slider {
+    position: absolute;
+    z-index: 2;
+}
+
+.slider-base-track {
+    position: absolute;
+    width: 100%;
+    height: 6px;
+    background-color: #e2e8f0;
+    border-radius: 10px;
+    z-index: 1;
+}
+
+.slider-active-range {
+    position: absolute;
+    height: 6px;
+    background-color: #3b82f6;
+    border-radius: 10px;
+    z-index: 2;
+}
+
+.slider.multi {
+    position: absolute;
+    pointer-events: none; 
+    z-index: 3;
+}
+
+.Single-slider::-webkit-slider-thumb,
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none !important; 
+    appearance: none !important;
+    pointer-events: auto; 
+    /* Ball Dimensions */
+    width: 18px !important;
+    height: 18px !important;
+    border-radius: 50%;
+    background-color: #3b82f6;
+    border: 2px solid #fff;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+    margin-top: -1px !important; 
+}
+
+/* Firefox */
+.Single-slider::-moz-range-thumb,
+.slider::-moz-range-thumb {
+    pointer-events: auto;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: #3b82f6;
+    border: 2px solid #fff;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+    margin-top: 0 !important;
+    border: none;
+}
+
+.salary-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    font-weight: 600;
+    color: #3b82f6;
+    font-size: 0.9rem;
+}
+
+.section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.filter-group {
+    width: 80%;
+    margin-left: 12%;
+}
+
+@media (max-width: 480px) {
+  .filter-group {
+    max-width: 100%; 
+  }
+}

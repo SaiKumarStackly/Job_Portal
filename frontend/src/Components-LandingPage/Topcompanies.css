@@ -1,0 +1,186 @@
+.carousel-wrapper {
+  padding: 1px;
+  max-width: 100%;
+  font-family: Arial, sans-serif;
+  background-color: white;
+  background-size: cover;
+  margin-top: 50px;
+}
+
+.carousel-title {
+  text-align: center;
+  font-size: 40px;
+  margin-bottom: 80px;
+  color: #022c43;
+}
+
+.carousel-card {
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 40px 20px 0px 20px;
+  box-shadow: 
+    0 -6px 10px -4px rgba(0, 0, 0, 0.12), 
+    0 6px 10px -4px rgba(0, 0, 0, 0.15);  
+  text-align: center;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 280px;
+  margin-left: 3rem;
+  border-top: 2px solid #D9D9D940;
+  border-bottom: 3px solid #D9D9D940;
+}
+
+.carousel-company-logo {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  margin: 0 auto 2rem;
+  display: block;
+}
+
+.carousel-card-header {
+    padding: 10px;
+    background-color: #D9D9D940;
+    border-radius: 8px;
+    width: 220px;
+    margin-left: 20px;
+}
+
+.carousel-card-header > h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+  color: #0a0a0a;
+}
+
+.carousel-card-header > p {
+  font-size: 14px;
+  color: #555;
+  margin-top: 5px;
+}
+
+.carousel-company-rating {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.star > img {
+  height: 15px;
+}
+
+.carousel-desc {
+  font-size: 14px;
+  color: #333;
+  margin: 20px 5px;
+  flex-grow: 1;
+}
+
+.carousel-view-jobs {
+  background-color: #1E88E5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 25px;
+  height: 40px;
+  width: 120px;
+}
+
+.carousel-view-jobs:hover {
+  background-color: #005dc1;
+}
+
+.carousel-view-all-wrapper {
+  text-align: center;
+  margin-top: 80px;
+  margin-bottom: 110px;
+}
+
+.carousel-view-all {
+  border: 2px solid #1E88E5;
+  background: transparent;
+  color: #1E88E5;
+  padding: 10px 20px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  height: 60px;
+  width: 190px;
+  font-size: 15px;
+}
+
+.carousel-view-all:hover {
+  background-color: #1E88E5;
+  color: white;
+}
+
+.custom-arrow {
+  position: absolute;
+  top: 45%;
+  transform: translateY(-50%);
+  z-index: 2;
+  cursor: pointer;
+}
+
+.custom-arrow img {
+  border-radius: 50%;
+  padding: 10px;
+  width: 60px;
+  height: 60px;
+}
+
+.custom-arrow.next {
+  right: 18px;
+}
+
+.custom-arrow.prev {
+  left: 20px;
+}
+
+/* --- Mobile Responsive: Top Companies Carousel --- */
+@media screen and (max-width: 768px) {
+  
+  .carousel-wrapper {
+    margin-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  .carousel-title {
+    font-size: 28px; /* Smaller title */
+    margin-bottom: 40px; /* Reduce gap */
+    padding: 0 10px;
+  }
+
+  /* 1. Fix Card Alignment */
+  .carousel-card {
+    margin-left: 0 !important;   /* Remove the 3rem left margin */
+    margin: 0 auto 20px auto;    /* Center the card inside the slide */
+    width: 80% !important;       /* Ensure it fits the screen width */
+    max-width: 300px;            /* limit width on larger phones */
+  }
+
+  /* 2. Fix Card Header */
+  .carousel-card-header {
+    width: auto;                 /* fluid width */
+    margin-left: 0;              /* remove fixed margin */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* 3. Hide Arrows on Mobile (Users swipe instead) */
+  .custom-arrow {
+    display: none !important;
+  }
+
+  /* 4. Adjust "View All" Button area */
+  .carousel-view-all-wrapper {
+    margin-top: 40px;
+    margin-bottom: 60px;
+  }
+}
