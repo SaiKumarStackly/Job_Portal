@@ -336,7 +336,7 @@ class EmployerProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='employer_profile')
 
     full_name = models.CharField(max_length=200, blank=True)           # ← personal name
-    employee_id = models.CharField(max_length=50, blank=True, unique=True)  # ← optional staff ID
+    employee_id = models.CharField(max_length=50, blank=True, unique=True,   null=True,)  # ← optional staff ID
 
     company = models.ForeignKey(
         'Company',

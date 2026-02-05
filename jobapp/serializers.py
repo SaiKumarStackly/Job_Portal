@@ -256,10 +256,18 @@ class EmployerProfileWriteSerializer(serializers.ModelSerializer):
         fields = ['full_name', 'employee_id', 'company']
 
     def validate_employee_id(self, value):
-        # Prevent duplicate employee IDs
-        if EmployerProfile.objects.filter(employee_id=value).exclude(id=self.instance.id).exists():
+        if not value:
+            return None
+
+        qs = EmployerProfile.objects.filter(employee_id=value)
+        if self.instance:
+            qs = qs.exclude(id=self.instance.id)
+
+        if qs.exists():
             raise serializers.ValidationError("This Employee ID is already in use.")
+
         return value
+
 
     def validate_company(self, value):
         if value and not value.is_active:

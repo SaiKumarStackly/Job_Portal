@@ -38,33 +38,46 @@ export const Jlogin = () => {
 
     if (!formValues.password.trim()) {
       newErrors.password = "Password is required"
-    } 
+    }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
-  function handleSubmit(formData) {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
     if (!validateForm()) return;
 
-    axios.post("http://127.0.0.1:8000/api/jobseeker/login/", {
-      username: formValues.username,
-      password: formValues.password
-    })
-    .then((res) => {
+    try {
+      const res = await axios.post(
+        "http://127.0.0.1:8000/api/login/",
+        {
+          email: formValues.username,
+          password: formValues.password,
+        }
+      );
+
+      // ✅ clear old errors
+      setErrors({});
+
+      // ✅ save tokens
       localStorage.setItem("access", res.data.access);
       localStorage.setItem("refresh", res.data.refresh);
 
-      navigate("/Job-portal/jobseeker/");
-    })
-    .catch((err) => {
+      // ✅ redirect to profile
+      navigate("/Job-portal/jobseeker/myprofile");
+
+    } catch (err) {
       setErrors({
-        password: err.response?.data?.error || "Invalid username or password"
+        password: "Invalid email or password",
       });
-    });
+    }
   };
 
-return (
+
+
+  return (
     <div className="login-page">
       <header className="login-header">
         <Link to="/Job-portal" className="logo">
@@ -83,7 +96,7 @@ return (
           <img src={manSitting} alt="Login Illustration" />
         </div>
 
-        <form action={handleSubmit} className="login-form">
+        <form onSubmit={handleSubmit} className="login-form">
           <h2>Login to continue</h2>
 
           <label>User name / Email ID</label>
@@ -102,7 +115,7 @@ return (
             <Link to="/Job-portal/jobseeker/login/forgotpassword" className='forgot-password'>Forgot Password?</Link>
           </div>
 
-          <button className="j-login-btn">Login</button>
+          <button type="submit" className="j-login-btn">Login</button>
 
           <div className="divider">Or Continue with</div>
 

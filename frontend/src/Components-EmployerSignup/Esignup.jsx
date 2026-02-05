@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api/axios";
 import "./Esignup.css";
 import workTime from "../assets/WorkTime.png";
 import eye from "../assets/show_password.png";
@@ -47,41 +47,53 @@ export const Esignup = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  if (!validateForm()) return;
+    if (!validateForm()) return;
 
-  setLoading(true);
-  setErrors({});
+    setLoading(true);
+    setErrors({});
 
-  try {
-    // SIGNUP ONLY
-    await axios.post("http://127.0.0.1:8000/api/employer/signup/", {
-      companyname: formValues.companyname,
-      username: formValues.username,
-      email: formValues.email,
-      password: formValues.password,
-      phone: formValues.phone,
-    });
+    try {
+      await api.post(
+        "http://127.0.0.1:8000/api/register/employer/",
+        {
+          company_name: formValues.companyname,   // ✅ correct key
+          username: formValues.username,
+          email: formValues.email,
+          phone: formValues.phone || null,
+          password: formValues.password,
+          password_confirm: formValues.confirmpassword, // ✅ REQUIRED
+        }
+      );
 
-    // SUCCESS → REDIRECT TO LOGIN
- navigate("/Job-portal/employer/login");
+      alert("Employer account created successfully. Please login.");
+      navigate("/Job-portal/employer/login");
 
-  } catch (err) {
-    console.error(err.response?.data);
+    } catch (err) {
+      const apiErrors = err.response?.data;
 
-    setErrors(
-      err.response?.data || { general: "Signup failed" }
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+      if (apiErrors) {
+        const newErrors = {};
+        Object.keys(apiErrors).forEach((key) => {
+          newErrors[key] = Array.isArray(apiErrors[key])
+            ? apiErrors[key][0]
+            : apiErrors[key];
+        });
+        setErrors(newErrors);
+      } else {
+        setErrors({ general: "Signup failed. Try again." });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
 
-return (
+
+  return (
     <div className="j-sign-up-page">
       <header className="j-sign-up-header">
         <Link to="/Job-portal" className="logo">
@@ -134,7 +146,8 @@ return (
           <input type="tel" name="phone" value={formValues.phone} onChange={handleForm} placeholder="Enter your mobile number" className={errors.phone ? "input-error" : ""} />
           {errors.phone && <span className="error-msg">{errors.phone}</span>}
 
-          <button className="j-sign-up-submit">Create Account</button>
+          <button type="submit"className="j-sign-up-submit"disabled={loading}>{loading ? "Creating..." : "Create Account"}</button>
+
         </form>
       </div>
     </div>

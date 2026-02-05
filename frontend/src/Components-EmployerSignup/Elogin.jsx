@@ -52,10 +52,10 @@ export const Elogin = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post(
-        "http://127.0.0.1:8000/api/employer/login/",
+      const res = await axios.post("http://127.0.0.1:8000/api/login/",
+
         {
-          username: formValues.username,
+          email: formValues.username,
           password: formValues.password,
         }
       );
@@ -63,13 +63,12 @@ export const Elogin = () => {
       // ✅ Save tokens
       localStorage.setItem("access", res.data.access);
       localStorage.setItem("refresh", res.data.refresh);
-      localStorage.setItem("username", res.data.username);
 
       // ✅ Redirect after login
       navigate("/Job-portal/employer/dashboard");
     } catch (err) {
       setErrors({
-        general: "Invalid username or password",
+        general: "Invalid email or password",
       });
     } finally {
       setLoading(false);
@@ -111,11 +110,11 @@ export const Elogin = () => {
             <span className="error-msg">{errors.general}</span>
           )}
 
-          <label>User name</label>
+          <label>Email ID</label>
           <input
             type="text"
             name="username"
-            placeholder="Enter your username"
+            placeholder="Enter your email address"
             value={formValues.username}
             onChange={handleForm}
             className={errors.username ? "input-error" : ""}

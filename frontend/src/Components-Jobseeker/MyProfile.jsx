@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState } from 'react'
 import './MyProfile.css'
 import { Link } from 'react-router-dom';
 import addPhoto from '../assets/AddPhoto.png'
@@ -6,6 +6,9 @@ import editIcon from '../assets/EditIcon.png'
 import uploadIcon from '../assets/UploadIcon.png'
 import deleteIcon from '../assets/DeleteIcon.png'
 import { JHeader } from './JHeader';
+import { useEffect } from "react";
+import api from "../api/axios";
+
 
 // --- REUSABLE COMPONENTS ---
 
@@ -45,8 +48,24 @@ const PopupModal = ({ title, isOpen, onClose, onSave, onDelete, mode, children }
 
 // --- FORM SECTIONS ---
 
-const Profile = ({ data, onChange, onReset, onNext }) => {
+const Profile = ({ data, onChange, onReset, onNext, setProfilePhoto }) => {
     const [errors, setErrors] = useState({});
+    const [photo, setPhoto] = useState(null);
+    const [photoPreview, setPhotoPreview] = useState(null);
+    const [resumeFile, setResumeFile] = useState(null);
+
+
+    const handlePhotoChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setPhoto(file);
+        setProfilePhoto(file);
+
+        setPhotoPreview(URL.createObjectURL(file));
+    };
+
+
     const AlphaOnlyreg = /^[A-Za-z]+(?: [A-Za-z]+)*$/;
     const today = new Date().toISOString().split('T')[0];
     const handleChange = (e) => {
@@ -57,8 +76,8 @@ const Profile = ({ data, onChange, onReset, onNext }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         const newErrors = {};
-        
-        
+
+
         if (!data.fullName?.trim()) newErrors.fullName = "*Full Name is required";
         else if (!AlphaOnlyreg.test(data.fullName)) newErrors.fullName = "*Please use letters only; no spaces or numbers allowed";
         if (data.gender === "Select") newErrors.gender = "*Please select a gender";
@@ -66,7 +85,7 @@ const Profile = ({ data, onChange, onReset, onNext }) => {
         else if (data.dob > today) newErrors.dob = "*Date cannot be in the future";
         if (data.maritalStatus === "Select") newErrors.maritalStatus = "*Please select status";
         if (!data.nationality?.trim()) newErrors.nationality = "*Nationality is required";
-        
+
         setErrors(newErrors);
 
         if (Object.keys(newErrors).length === 0) {
@@ -85,14 +104,33 @@ const Profile = ({ data, onChange, onReset, onNext }) => {
             <div className="profile-layout">
                 <div className="photo-uploader">
                     <div className="photo-placeholder">
-                        <img className='photo-placeholder-icon' src={addPhoto} alt='upload' />
-                        <p>Upload photo</p>
+                        {photoPreview ? (
+                            <img
+                                src={photoPreview}
+                                alt="Preview"
+                                style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "8px" }}
+                            />
+                        ) : (
+                            <>
+                                <img className="photo-placeholder-icon" src={addPhoto} alt="upload" />
+                                <p>Upload photo</p>
+                            </>
+                        )}
+
+                        <input
+                            type="file"
+                            accept="image/png, image/jpeg, image/jpg"
+                            id="photoUpload"
+                            hidden
+                            onChange={handlePhotoChange}
+                        />
                     </div>
+
                     <small>Allowed format: </small>
                     <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>JPG, JPEG, and PNG</span>
                     <div className="photo-actions">
                         <button type="button" className="photo-btn remove"><img className='upload-icon-btn' src={deleteIcon} alt='delete' /> Remove Photo</button>
-                        <button type="button" className="photo-btn upload"><img className='upload-icon-btn' src={uploadIcon} alt='upload' /> Upload Photo</button>
+                        <button type="button" className="photo-btn upload" onClick={() => document.getElementById("photoUpload").click()}><img className='upload-icon-btn' src={uploadIcon} alt='upload' /> Upload Photo</button>
                     </div>
                 </div>
                 <div className="profile-form">
@@ -141,7 +179,7 @@ const Profile = ({ data, onChange, onReset, onNext }) => {
 
 const CurrentDetails = ({ data, onChange, onReset, onNext }) => {
     const [errors, setErrors] = useState({});
-    const handleChange = (e) => { onChange(e); if(errors[e.target.name]) setErrors({...errors, [e.target.name]: ''}); };
+    const handleChange = (e) => { onChange(e); if (errors[e.target.name]) setErrors({ ...errors, [e.target.name]: '' }); };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -151,9 +189,9 @@ const CurrentDetails = ({ data, onChange, onReset, onNext }) => {
         if (!data.experience) newErrors.experience = "Required";
         if (data.noticePeriod === 'Select') newErrors.noticePeriod = "Required";
         if (!data.currentLocation?.trim()) newErrors.currentLocation = "Required";
-        
+
         setErrors(newErrors);
-        
+
         if (Object.keys(newErrors).length === 0) {
             onNext();
         } else {
@@ -168,16 +206,16 @@ const CurrentDetails = ({ data, onChange, onReset, onNext }) => {
                 <button type="button" className="reset-link" onClick={() => { onReset(); setErrors({}); }}>Reset</button>
             </div>
             <div className="form-grid">
-                <div className="form-group"><label>Current Job Title</label><input type="text" name="jobTitle" value={data.jobTitle || ''} onChange={handleChange} className={errors.jobTitle ? 'input-error' : ''} placeholder="e.g., Software Engineer"/></div>
-                <div className="form-group"><label>Current Company</label><input type="text" name="company" value={data.company || ''} onChange={handleChange} className={errors.company ? 'input-error' : ''} placeholder="e.g., XYZ Company"/></div>
+                <div className="form-group"><label>Current Job Title</label><input type="text" name="jobTitle" value={data.jobTitle || ''} onChange={handleChange} className={errors.jobTitle ? 'input-error' : ''} placeholder="e.g., Software Engineer" /></div>
+                <div className="form-group"><label>Current Company</label><input type="text" name="company" value={data.company || ''} onChange={handleChange} className={errors.company ? 'input-error' : ''} placeholder="e.g., XYZ Company" /></div>
                 <div className="form-group"><label>Total Experience (Years)</label><input type="number" name="experience" min="0" step="0.1" placeholder="e.g. 2.5" value={data.experience || ''} onChange={handleChange} className={errors.experience ? 'input-error' : ''} /></div>
                 <div className="form-group"><label>Notice Period</label>
                     <select name="noticePeriod" value={data.noticePeriod || 'Select'} onChange={handleChange} className={errors.noticePeriod ? 'input-error' : ''}>
                         <option value="Select">Select</option><option value="Immediate">Immediate</option><option value="1 Month">1 Month</option><option value="2 Months">2 Months</option><option value="3 Months">3 Months</option>
                     </select>
                 </div>
-                <div className="form-group full-width"><label>Current Location</label><input type="text" name="currentLocation" value={data.currentLocation || ''} onChange={handleChange} className={errors.currentLocation ? 'input-error' : ''} placeholder="e.g., Bangalore"/></div>
-                <div className="form-group full-width"><label>Preferred Location(s)</label><input type="text" name="prefLocation" value={data.prefLocation || ''} onChange={handleChange} placeholder="e.g., Bangalore, Chennai, Coimbatore"/></div>
+                <div className="form-group full-width"><label>Current Location</label><input type="text" name="currentLocation" value={data.currentLocation || ''} onChange={handleChange} className={errors.currentLocation ? 'input-error' : ''} placeholder="e.g., Bangalore" /></div>
+                <div className="form-group full-width"><label>Preferred Location(s)</label><input type="text" name="prefLocation" value={data.prefLocation || ''} onChange={handleChange} placeholder="e.g., Bangalore, Chennai, Coimbatore" /></div>
             </div>
             <div className="form-actions"><button type="submit" className="btn btn-primary">Save & Continue</button></div>
         </form>
@@ -186,7 +224,7 @@ const CurrentDetails = ({ data, onChange, onReset, onNext }) => {
 
 const ContactDetails = ({ data, onChange, onReset, onNext }) => {
     const [errors, setErrors] = useState({});
-    const handleChange = (e) => { onChange(e); if(errors[e.target.name]) setErrors({...errors, [e.target.name]: ''}); };
+    const handleChange = (e) => { onChange(e); if (errors[e.target.name]) setErrors({ ...errors, [e.target.name]: '' }); };
     const mobileRegex = /^\d{10}$/;
     const Pincode = /^[1-9][0-9]{5}$/
     const handleSubmit = (e) => {
@@ -197,17 +235,17 @@ const ContactDetails = ({ data, onChange, onReset, onNext }) => {
 
         if (data.altMobile && !mobileRegex.test(data.altMobile)) newErrors.altMobile = "Invalid Mobile Number";
 
-        else if (data.mobile.length >0 && data.mobile === data.altMobile) newErrors.altMobile = "Mobile Number Should Not be same";
+        else if (data.mobile.length > 0 && data.mobile === data.altMobile) newErrors.altMobile = "Mobile Number Should Not be same";
         if (!data.email) newErrors.email = "Required";
-        else if (data.email.length>0 && data.email === data.altEmail) newErrors.altEmail = "Email Should Not be same";
+        else if (data.email.length > 0 && data.email === data.altEmail) newErrors.altEmail = "Email Should Not be same";
         if (!data.address) newErrors.address = "Required";
         if (!data.country) newErrors.country = "Required";
         if (!data.state) newErrors.state = "Required";
         if (!data.street) newErrors.street = "Required";
         if (!data.pincode) newErrors.pincode = "Required";
         if (!data.city) newErrors.city = "Required";
-            else if(!Pincode.test(data.pincode)) newErrors.pincode = "Enter a Valid PinCode";
-        
+        else if (!Pincode.test(data.pincode)) newErrors.pincode = "Enter a Valid PinCode";
+
         setErrors(newErrors);
         if (Object.keys(newErrors).length === 0) {
             onNext();
@@ -223,55 +261,122 @@ const ContactDetails = ({ data, onChange, onReset, onNext }) => {
                 <button type="button" className="reset-link" onClick={() => { onReset(); setErrors({}); }}>Reset</button>
             </div>
             <div className="form-grid">
-                <div className="form-group"><label>Mobile Number</label><input type="tel" name="mobile" value={data.mobile || ''} onChange={handleChange} className={errors.mobile ? 'input-error' : ''} placeholder="Enter phone number"/>
-                {errors.mobile && <span className="error-msg">{errors.mobile}</span>}</div>
+                <div className="form-group"><label>Mobile Number</label><input type="tel" name="mobile" value={data.mobile || ''} onChange={handleChange} className={errors.mobile ? 'input-error' : ''} placeholder="Enter phone number" />
+                    {errors.mobile && <span className="error-msg">{errors.mobile}</span>}</div>
 
-                <div className="form-group"><label>Alternate Number</label><input type="tel" name="altMobile" value={data.altMobile || ''} onChange={handleChange} placeholder="Enter phone number"/>
-                {errors.altMobile && <span className="error-msg">{errors.altMobile}</span>}</div>
+                <div className="form-group"><label>Alternate Number</label><input type="tel" name="altMobile" value={data.altMobile || ''} onChange={handleChange} placeholder="Enter phone number" />
+                    {errors.altMobile && <span className="error-msg">{errors.altMobile}</span>}</div>
 
-                <div className="form-group"><label>Email ID</label><input type="email" name="email" value={data.email || ''} onChange={handleChange} className={errors.email ? 'input-error' : ''} placeholder="Enter email address"/>
-                {errors.email && <span className="error-msg">{errors.email}</span>}</div>
-                
-                <div className="form-group"><label>Alternate Email</label><input type="email" name="altEmail" value={data.altEmail || ''} onChange={handleChange} placeholder="Enter email address"/>
-                {errors.altEmail && <span className="error-msg">{errors.altEmail}</span>}</div>
-                
-                <div className="form-group full-width"><label>Address</label><input type="text" name="address" value={data.address || ''} onChange={onChange} className={errors.address ? 'input-error' : ''} placeholder="Street, City, State, Pincode, Country"/>
-                {errors.address && <span className="error-msg">{errors.address}</span>}</div>
-                
-                <div className="form-group"><label>Street</label><input type="text" name="street" value={data.street || ''} onChange={handleChange} placeholder="e.g., Flat 402"/>
-                {errors.street && <span className="error-msg">{errors.street}</span>}</div>
-                
-                <div className="form-group"><label>City</label><input type="text" name="city" value={data.city || ''} onChange={handleChange} placeholder="e.g., Green Park"/>
-                {errors.city && <span className="error-msg">{errors.city}</span>}</div>
-                
-                <div className="form-group"><label>State</label><input type="text" name="state" value={data.state || ''} onChange={handleChange} placeholder="e.g., Karnataka"/>
-                {errors.state && <span className="error-msg">{errors.state}</span>}</div>
-                
-                <div className="form-group"><label>Pincode</label><input type="text" name="pincode" value={data.pincode || ''} onChange={handleChange} placeholder="e.g., 625601"/>
-                {errors.pincode && <span className="error-msg">{errors.pincode}</span>}</div>
-                
-                <div className="form-group"><label>Country</label><input type="text" name="country" value={data.country || ''} onChange={handleChange} className={errors.country ? 'input-error' : ''} placeholder="e.g., India"/>
-                {errors.country && <span className="error-msg">{errors.country}</span>}</div>
+                <div className="form-group"><label>Email ID</label><input type="email" name="email" value={data.email || ''} onChange={handleChange} className={errors.email ? 'input-error' : ''} placeholder="Enter email address" />
+                    {errors.email && <span className="error-msg">{errors.email}</span>}</div>
+
+                <div className="form-group"><label>Alternate Email</label><input type="email" name="altEmail" value={data.altEmail || ''} onChange={handleChange} placeholder="Enter email address" />
+                    {errors.altEmail && <span className="error-msg">{errors.altEmail}</span>}</div>
+
+                <div className="form-group full-width"><label>Address</label><input type="text" name="address" value={data.address || ''} onChange={onChange} className={errors.address ? 'input-error' : ''} placeholder="Street, City, State, Pincode, Country" />
+                    {errors.address && <span className="error-msg">{errors.address}</span>}</div>
+
+                <div className="form-group"><label>Street</label><input type="text" name="street" value={data.street || ''} onChange={handleChange} placeholder="e.g., Flat 402" />
+                    {errors.street && <span className="error-msg">{errors.street}</span>}</div>
+
+                <div className="form-group"><label>City</label><input type="text" name="city" value={data.city || ''} onChange={handleChange} placeholder="e.g., Green Park" />
+                    {errors.city && <span className="error-msg">{errors.city}</span>}</div>
+
+                <div className="form-group"><label>State</label><input type="text" name="state" value={data.state || ''} onChange={handleChange} placeholder="e.g., Karnataka" />
+                    {errors.state && <span className="error-msg">{errors.state}</span>}</div>
+
+                <div className="form-group"><label>Pincode</label><input type="text" name="pincode" value={data.pincode || ''} onChange={handleChange} placeholder="e.g., 625601" />
+                    {errors.pincode && <span className="error-msg">{errors.pincode}</span>}</div>
+
+                <div className="form-group"><label>Country</label><input type="text" name="country" value={data.country || ''} onChange={handleChange} className={errors.country ? 'input-error' : ''} placeholder="e.g., India" />
+                    {errors.country && <span className="error-msg">{errors.country}</span>}</div>
             </div>
             <div className="form-actions"><button type="submit" className="btn btn-primary">Save & Continue</button></div>
         </form>
     );
 };
 
-const ResumeSection = ({ data, onChange, onReset, onNext }) => (
-    <form className="content-card" onSubmit={(e) => { e.preventDefault(); onNext(); }}>
-        <div className="profile-header">
-            <h2>Resume</h2>
-            <button type="button" className="reset-link" onClick={onReset}>Reset</button>
-        </div>
-        <div className="upload-box">
-            <div className="upload-text"><img className='upload-icon-btn' src={uploadIcon} alt='upload' /> Upload Resume</div>
-            <small>Allowed formats: PDF, DOC, DOCX</small>
-        </div>
-        <div className="form-group full-width"><label>Portfolio/Website Link</label><input type="url" name="portfolio" value={data.portfolio || ''} onChange={onChange} placeholder="Enter URL" /></div>
-        <div className="form-actions"><button type="submit" className="btn btn-primary">Save & Continue</button></div>
-    </form>
-);
+const ResumeSection = ({ data, onChange, onReset, onNext, setResumeFile, resumeFile }) => {
+
+    const handleResumeChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const allowedTypes = [
+            "application/pdf",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        ];
+
+        if (!allowedTypes.includes(file.type)) {
+            alert("Only PDF, DOC, DOCX allowed");
+            return;
+        }
+
+        setResumeFile(file);
+    };
+
+    return (
+        <form
+            className="content-card"
+            onSubmit={(e) => {
+                e.preventDefault();
+                onNext();
+            }}
+        >
+            <div className="profile-header">
+                <h2>Resume</h2>
+                <button type="button" className="reset-link" onClick={onReset}>
+                    Reset
+                </button>
+            </div>
+
+            <div
+                className="upload-box"
+                style={{ cursor: "pointer" }}
+                onClick={() => document.getElementById("resumeUpload").click()}
+            >
+                <div className="upload-text">
+                    ⬆ Upload Resume
+                </div>
+                <small>Allowed formats: PDF, DOC, DOCX</small>
+            </div>
+
+            {/* ✅ SHOW SELECTED FILE NAME */}
+            {resumeFile && (
+                <small style={{ color: "green", marginTop: "8px", display: "block" }}>
+                    Selected file: {resumeFile.name}
+                </small>
+            )}
+
+            <input
+                type="file"
+                id="resumeUpload"
+                hidden
+                accept=".pdf,.doc,.docx"
+                onChange={handleResumeChange}
+            />
+
+            <div className="form-group full-width">
+                <label>Portfolio / Website Link</label>
+                <input
+                    type="url"
+                    name="portfolio"
+                    value={data.portfolio || ""}
+                    onChange={onChange}
+                    placeholder="Enter URL"
+                />
+            </div>
+
+            <div className="form-actions">
+                <button type="submit" className="btn btn-primary">
+                    Save & Continue
+                </button>
+            </div>
+        </form>
+    );
+};
+
 
 const EducationDetails = ({ data, onUpdateSSLC, onUpdateHSC, onUpdateGrad, onAddGrad, onRemoveGrad, onReset, onNext }) => {
     const [openSection, setOpenSection] = useState(null);
@@ -279,11 +384,11 @@ const EducationDetails = ({ data, onUpdateSSLC, onUpdateHSC, onUpdateGrad, onAdd
     const today = new Date().toISOString().split('T')[0];
     const percentageReg = /^(\d{1,2}(\.\d{1,2})?|100(\.0{1,2})?)%?$/
 
- 
+
     const [errors, setErrors] = useState({});
-   
- 
-     const handleSubmit = (e) => {
+
+
+    const handleSubmit = (e) => {
         e.preventDefault();
         const newErrors = {};
         if (!data.highestQual || data.highestQual === 'Select') newErrors.highestQual = "Select atleast One";
@@ -293,19 +398,21 @@ const EducationDetails = ({ data, onUpdateSSLC, onUpdateHSC, onUpdateGrad, onAdd
         if (!data.sslc.location) newErrors.sslclocation = "Required";
         if (!data.sslc.year) newErrors.sslcyear = "Date Of Year Required";
         else if (data.sslc.year > today) {
-        newErrors.sslcyear = "Year cannot be in the future";}
- 
- 
-        if (!data.hsc.stream ||data.hsc.stream === 'Select') newErrors.hscstream = 'Select atleast One';
+            newErrors.sslcyear = "Year cannot be in the future";
+        }
+
+
+        if (!data.hsc.stream || data.hsc.stream === 'Select') newErrors.hscstream = 'Select atleast One';
         if (!data.hsc.institution) newErrors.hscinstitution = "Required";
         if (!data.hsc.percentage) newErrors.hscpercentage = "Required";
-         else if (!percentageReg.test(data.hsc.percentage)) newErrors.hscpercentage = "Invalid format";
+        else if (!percentageReg.test(data.hsc.percentage)) newErrors.hscpercentage = "Invalid format";
         if (!data.hsc.location) newErrors.hsclocation = "Required";
         if (!data.hsc.year) newErrors.hscyear = "Date Of Year Required";
         else if (data.hsc.year > today) {
-        newErrors.hscyear = "Year cannot be in the future";}
-   
-       
+            newErrors.hscyear = "Year cannot be in the future";
+        }
+
+
         setErrors(newErrors);
         if (Object.keys(newErrors).length === 0) {
             onNext();
@@ -313,15 +420,15 @@ const EducationDetails = ({ data, onUpdateSSLC, onUpdateHSC, onUpdateGrad, onAdd
             alert("Please fill all required fields.");
         }
     };
- 
- 
+
+
     return (
         <form className="content-card" onSubmit={handleSubmit}>
             <div className="profile-header">
                 <h2>Education Details</h2>
                 <button type="button" className="reset-link" onClick={onReset}>Reset</button>
             </div>
-           
+
             <div className="form-group full-width" style={{ marginBottom: '1.5rem' }}>
                 <label>Highest Qualification?</label>
                 <select name="highestQual" value={data.highestQual} onChange={onUpdateSSLC}>
@@ -329,7 +436,7 @@ const EducationDetails = ({ data, onUpdateSSLC, onUpdateHSC, onUpdateGrad, onAdd
                 </select>
                 {errors.highestQual && <span className="error-msg">{errors.highestQual}</span>}
             </div>
- 
+
             <div className="accordion-wrapper">
                 {/* --- SSLC Form --- */}
                 <div className="accordion-item">
@@ -340,21 +447,21 @@ const EducationDetails = ({ data, onUpdateSSLC, onUpdateHSC, onUpdateGrad, onAdd
                         <div className="accordion-body">
                             <div className="form-grid">
                                 <div className="form-group"><label>Name of Institution</label><input type="text" name="institution" value={data.sslc.institution} onChange={onUpdateSSLC} placeholder="e.g., XYZ School" />
-                                {errors.sslcinstitution && <span className="error-msg">{errors.sslcinstitution}</span>} </div>
- 
+                                    {errors.sslcinstitution && <span className="error-msg">{errors.sslcinstitution}</span>} </div>
+
                                 <div className="form-group"><label>Percentage</label><input type="text" name="percentage" value={data.sslc.percentage} onChange={onUpdateSSLC} placeholder="e.g., 80%" />
-                                {errors.sslcpercentage && <span className="error-msg">{errors.sslcpercentage}</span>}</div>
- 
+                                    {errors.sslcpercentage && <span className="error-msg">{errors.sslcpercentage}</span>}</div>
+
                                 <div className="form-group"><label>Location</label><input type="text" name="location" value={data.sslc.location} onChange={onUpdateSSLC} placeholder="e.g., Bangalore" />
-                                {errors.sslclocation && <span className="error-msg">{errors.sslclocation}</span>}</div>
- 
+                                    {errors.sslclocation && <span className="error-msg">{errors.sslclocation}</span>}</div>
+
                                 <div className="form-group"><label>Year of completion</label><input type="date" name="year" value={data.sslc.year} onChange={onUpdateSSLC} />
-                                {errors.sslcyear && <span className="error-msg">{errors.sslcyear}</span>}</div>
+                                    {errors.sslcyear && <span className="error-msg">{errors.sslcyear}</span>}</div>
                             </div>
                         </div>
                     )}
                 </div>
- 
+
                 {/* --- HSC Form --- */}
                 <div className="accordion-item">
                     <div className="accordion-header" onClick={() => toggleSection('hsc')}>
@@ -373,28 +480,28 @@ const EducationDetails = ({ data, onUpdateSSLC, onUpdateHSC, onUpdateGrad, onAdd
                                     {errors.hscstream && <span className="error-msg">{errors.hscstream}</span>}
                                 </div>
                                 <div className="form-group"><label>Name of Institution</label><input type="text" name="institution" value={data.hsc.institution} onChange={onUpdateHSC} placeholder="e.g., XYZ School" />
-                                 {errors.hscinstitution && <span className="error-msg">{errors.hscinstitution}</span>}</div>
+                                    {errors.hscinstitution && <span className="error-msg">{errors.hscinstitution}</span>}</div>
                                 <div className="form-group"><label>Location</label><input type="text" name="location" value={data.hsc.location} onChange={onUpdateHSC} placeholder="e.g., Bangalore" />
-                                {errors.hsclocation && <span className="error-msg">{errors.hsclocation}</span>}</div>
+                                    {errors.hsclocation && <span className="error-msg">{errors.hsclocation}</span>}</div>
                                 <div className="form-group"><label>Year of completion</label><input type="date" name="year" value={data.hsc.year} onChange={onUpdateHSC} />
-                                 {errors.hscyear && <span className="error-msg">{errors.hscyear}</span>}</div>
+                                    {errors.hscyear && <span className="error-msg">{errors.hscyear}</span>}</div>
                                 <div className="form-group"><label>Percentage</label><input type="text" name="percentage" value={data.hsc.percentage} onChange={onUpdateHSC} placeholder="e.g., 80%" />
-                                {errors.hscpercentage && <span className="error-msg">{errors.hscpercentage}</span>}</div>
+                                    {errors.hscpercentage && <span className="error-msg">{errors.hscpercentage}</span>}</div>
                             </div>
                         </div>
                     )}
                 </div>
- 
+
                 {/* --- Graduation Forms --- */}
                 {data.graduations.map((grad, index) => (
                     <div className="accordion-item" key={grad.id}>
                         <div className="accordion-header" onClick={() => toggleSection(`grad-${grad.id}`)}>
-                            <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <span>Graduation {index > 0 ? index + 1 : ''}</span>
                             </div>
                             <span className="accordion-icon">{openSection === `grad-${grad.id}` ? '-' : '+'}</span>
                         </div>
-                       
+
                         {openSection === `grad-${grad.id}` && (
                             <div className="accordion-body">
                                 {index > 0 && (
@@ -404,7 +511,7 @@ const EducationDetails = ({ data, onUpdateSSLC, onUpdateHSC, onUpdateGrad, onAdd
                                         </button>
                                     </div>
                                 )}
- 
+
                                 <div className="form-grid">
                                     <div className="form-group"><label>Degree</label><input type="text" name="degree" value={grad.degree} onChange={(e) => onUpdateGrad(grad.id, e)} placeholder="e.g., B.E" /></div>
                                     <div className="form-group"><label>Degree status</label><select name="status" value={grad.status} onChange={(e) => onUpdateGrad(grad.id, e)}><option value="Select">Select</option><option value="Completed">Completed</option><option value="Pursuing">Pursuing</option></select></div>
@@ -422,7 +529,7 @@ const EducationDetails = ({ data, onUpdateSSLC, onUpdateHSC, onUpdateGrad, onAdd
                     </div>
                 ))}
             </div>
-           
+
             <button type="button" className="add-link" onClick={onAddGrad}>+ Add Education</button>
             <div className="form-actions"><button type="submit" className="btn btn-primary">Save & Continue</button></div>
         </form>
@@ -433,7 +540,7 @@ const WorkExperience = ({ data, onChange, onUpdateEntry, onAddEntry, onRemoveEnt
     const handleSubmit = (e) => {
         e.preventDefault();
         if (data.status === 'Experienced') {
-           
+
             const isValid = data.entries.every(entry => entry.title && entry.company);
             if (!isValid) {
                 alert("Please fill in Job Title and Company for all entries.");
@@ -444,75 +551,75 @@ const WorkExperience = ({ data, onChange, onUpdateEntry, onAddEntry, onRemoveEnt
     };
 
     return (
-    <form className="content-card" onSubmit={handleSubmit}>
-        <div className="profile-header">
-            <h2>Work Experience</h2>
-            <button type="button" className="reset-link" onClick={onReset}>Reset</button>
-        </div>
-        <div className="form-grid">
-            <div className="form-group"><label>Current Status</label><select name="status" value={data.status || 'Fresher'} onChange={onChange}><option value="Fresher">Fresher</option><option value="Experienced">Experienced</option></select></div>
-            <div className="form-group"><label>Do you have any internship or work experience?</label><select name="hasExperience" value={data.hasExperience || 'No'} onChange={onChange}><option value="No">No</option><option value="Yes">Yes</option></select></div>
-        </div>
-        
-        {data.status === 'Experienced' && (
-            <>
-                {data.entries.map((entry, index) => (
-                    <div key={entry.id} style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid #eee' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                            <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: '600' }}>Company {index + 1}</h4>
-                            <button type="button" onClick={() => onRemoveEntry(entry.id)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                                <img className='upload-icon-btn' src={deleteIcon} alt='delete' />
-                            </button>
+        <form className="content-card" onSubmit={handleSubmit}>
+            <div className="profile-header">
+                <h2>Work Experience</h2>
+                <button type="button" className="reset-link" onClick={onReset}>Reset</button>
+            </div>
+            <div className="form-grid">
+                <div className="form-group"><label>Current Status</label><select name="status" value={data.status || 'Fresher'} onChange={onChange}><option value="Fresher">Fresher</option><option value="Experienced">Experienced</option></select></div>
+                <div className="form-group"><label>Do you have any internship or work experience?</label><select name="hasExperience" value={data.hasExperience || 'No'} onChange={onChange}><option value="No">No</option><option value="Yes">Yes</option></select></div>
+            </div>
+
+            {data.status === 'Experienced' && (
+                <>
+                    {data.entries.map((entry, index) => (
+                        <div key={entry.id} style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid #eee' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: '600' }}>Company {index + 1}</h4>
+                                <button type="button" onClick={() => onRemoveEntry(entry.id)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                                    <img className='upload-icon-btn' src={deleteIcon} alt='delete' />
+                                </button>
+                            </div>
+                            <div className="form-grid">
+                                <div className="form-group"><label>Job Title</label><input type="text" name="title" value={entry.title} onChange={(e) => onUpdateEntry(entry.id, e)} placeholder="e.g., Software Engineer" /></div>
+                                <div className="form-group"><label>Company Name</label><input type="text" name="company" value={entry.company} onChange={(e) => onUpdateEntry(entry.id, e)} placeholder="e.g., XYZ Company" /></div>
+                                <div className="form-group"><label>Start Date</label><input type="date" name="startDate" value={entry.startDate} onChange={(e) => onUpdateEntry(entry.id, e)} /></div>
+                                <div className="form-group"><label>End Date</label><input type="date" name="endDate" value={entry.endDate} onChange={(e) => onUpdateEntry(entry.id, e)} /></div>
+
+                                <div className="form-group">
+                                    <label>Industry / Domain</label>
+                                    <select name="industry" value={entry.industry} onChange={(e) => onUpdateEntry(entry.id, e)}>
+                                        <option value="Select">Select</option>
+                                        <option value="IT">IT - Software</option>
+                                        <option value="Finance">Finance</option>
+                                        <option value="Marketing">Marketing</option>
+                                        <option value="Education">Education</option>
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Job Type</label>
+                                    <select name="jobType" value={entry.jobType} onChange={(e) => onUpdateEntry(entry.id, e)}>
+                                        <option value="Select">Select</option>
+                                        <option value="Full-time">Full-time</option>
+                                        <option value="Part-time">Part-time</option>
+                                        <option value="Internship">Internship</option>
+                                        <option value="Contract">Contract</option>
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Location</label>
+                                    <input type="text" name="location" value={entry.location} onChange={(e) => onUpdateEntry(entry.id, e)} placeholder="e.g., Bangalore" />
+                                </div>
+                                <div className="form-group">
+                                    <label>Key Responsibilities / Achievements</label>
+                                    <input type="text" name="responsibilities" value={entry.responsibilities} onChange={(e) => onUpdateEntry(entry.id, e)} placeholder="Type..." />
+                                </div>
+                            </div>
                         </div>
-                        <div className="form-grid">
-                            <div className="form-group"><label>Job Title</label><input type="text" name="title" value={entry.title} onChange={(e) => onUpdateEntry(entry.id, e)} placeholder="e.g., Software Engineer"/></div>
-                            <div className="form-group"><label>Company Name</label><input type="text" name="company" value={entry.company} onChange={(e) => onUpdateEntry(entry.id, e)} placeholder="e.g., XYZ Company"/></div>
-                            <div className="form-group"><label>Start Date</label><input type="date" name="startDate" value={entry.startDate} onChange={(e) => onUpdateEntry(entry.id, e)} /></div>
-                            <div className="form-group"><label>End Date</label><input type="date" name="endDate" value={entry.endDate} onChange={(e) => onUpdateEntry(entry.id, e)} /></div>
-                            
-                            <div className="form-group">
-                                <label>Industry / Domain</label>
-                                <select name="industry" value={entry.industry} onChange={(e) => onUpdateEntry(entry.id, e)}>
-                                    <option value="Select">Select</option>
-                                    <option value="IT">IT - Software</option>
-                                    <option value="Finance">Finance</option>
-                                    <option value="Marketing">Marketing</option>
-                                    <option value="Education">Education</option>
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label>Job Type</label>
-                                <select name="jobType" value={entry.jobType} onChange={(e) => onUpdateEntry(entry.id, e)}>
-                                    <option value="Select">Select</option>
-                                    <option value="Full-time">Full-time</option>
-                                    <option value="Part-time">Part-time</option>
-                                    <option value="Internship">Internship</option>
-                                    <option value="Contract">Contract</option>
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label>Location</label>
-                                <input type="text" name="location" value={entry.location} onChange={(e) => onUpdateEntry(entry.id, e)} placeholder="e.g., Bangalore" />
-                            </div>
-                            <div className="form-group">
-                                <label>Key Responsibilities / Achievements</label>
-                                <input type="text" name="responsibilities" value={entry.responsibilities} onChange={(e) => onUpdateEntry(entry.id, e)} placeholder="Type..." />
-                            </div>
-                        </div>
-                    </div>
-                ))}
-                <button type="button" className="add-link" onClick={onAddEntry}>+ Add another</button>
-            </>
-        )}
-        
-        <div className="form-actions"><button type="submit" className="btn btn-primary">Save & Continue</button></div>
-    </form>
+                    ))}
+                    <button type="button" className="add-link" onClick={onAddEntry}>+ Add another</button>
+                </>
+            )}
+
+            <div className="form-actions"><button type="submit" className="btn btn-primary">Save & Continue</button></div>
+        </form>
     );
 };
 
 const KeySkills = ({ skills, onAdd, onUpdate, onDelete, onReset, onNext }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editIndex, setEditIndex] = useState(null); 
+    const [editIndex, setEditIndex] = useState(null);
     const [currentSkill, setCurrentSkill] = useState("");
 
     const openAdd = () => { setEditIndex(null); setCurrentSkill(""); setIsModalOpen(true); };
@@ -527,12 +634,12 @@ const KeySkills = ({ skills, onAdd, onUpdate, onDelete, onReset, onNext }) => {
     };
 
     const handleDelete = () => { if (editIndex !== null) { onDelete(editIndex); setIsModalOpen(false); } };
-    const handleReset=()=>{
+    const handleReset = () => {
         if (onReset) {
-    onReset('skills'); 
-  }
+            onReset('skills');
+        }
     };
-    
+
 
     return (
         <form className="content-card" onSubmit={(e) => { e.preventDefault(); onNext(); }}>
@@ -582,8 +689,8 @@ const LanguagesKnown = ({ languages, onAdd, onUpdate, onDelete, onReset, onNext 
             <button type="button" className="add-link" onClick={openAdd}>+ Add another</button>
             <div className="form-actions"><button type="submit" className="btn btn-primary">Save & Continue</button></div>
             <PopupModal title={editIndex !== null ? "Edit Language" : "Add Language"} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSave} onDelete={handleDelete} mode={editIndex !== null ? 'edit' : 'add'}>
-                <div className="form-group" style={{marginBottom:'1rem'}}><label>Language Name *</label><input type="text" value={currentLang.name} onChange={(e) => setCurrentLang({...currentLang, name: e.target.value})} placeholder="e.g., English" /></div>
-                <div className="form-group"><label>Proficiency</label><select value={currentLang.proficiency} onChange={(e) => setCurrentLang({...currentLang, proficiency: e.target.value})}><option value="Select">Select</option><option value="Beginner">Beginner</option><option value="Intermediate">Intermediate</option><option value="Fluent">Fluent</option><option value="Native">Native</option></select></div>
+                <div className="form-group" style={{ marginBottom: '1rem' }}><label>Language Name *</label><input type="text" value={currentLang.name} onChange={(e) => setCurrentLang({ ...currentLang, name: e.target.value })} placeholder="e.g., English" /></div>
+                <div className="form-group"><label>Proficiency</label><select value={currentLang.proficiency} onChange={(e) => setCurrentLang({ ...currentLang, proficiency: e.target.value })}><option value="Select">Select</option><option value="Beginner">Beginner</option><option value="Intermediate">Intermediate</option><option value="Fluent">Fluent</option><option value="Native">Native</option></select></div>
             </PopupModal>
         </form>
     );
@@ -619,110 +726,136 @@ const Certifications = ({ certs, onAdd, onUpdate, onDelete, onReset, onNext }) =
             <button type="button" className="add-link" onClick={openAdd}>+ Add another certification</button>
             <div className="form-actions"><button type="submit" className="btn btn-primary">Save & Continue</button></div>
             <PopupModal title={editIndex !== null ? "Edit Certification" : "Add Certification"} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSave} onDelete={handleDelete} mode={editIndex !== null ? 'edit' : 'add'}>
-                <div className="form-group" style={{marginBottom:'1rem'}}><label>Certification Name *</label><input type="text" value={currentCert.name} onChange={(e) => setCurrentCert({...currentCert, name: e.target.value})} placeholder="e.g., Full-stack development" /></div>
-                <div className="form-group"><label>Upload Certificate (PDF, PNG, JPEG)</label><div style={{border:'1px solid #ddd', padding:'8px', borderRadius:'6px', display:'flex', alignItems:'center', justifyContent:'space-between', background:'#fff'}}><span style={{color: currentCert.file ? '#333' : '#999', fontSize:'0.9rem'}}>{currentCert.file ? "File Selected" : "Not Uploaded"}</span><span style={{fontSize:'1.2rem', color:'#666'}}>⋮</span></div></div>
+                <div className="form-group" style={{ marginBottom: '1rem' }}><label>Certification Name *</label><input type="text" value={currentCert.name} onChange={(e) => setCurrentCert({ ...currentCert, name: e.target.value })} placeholder="e.g., Full-stack development" /></div>
+                <div className="form-group"><label>Upload Certificate (PDF, PNG, JPEG)</label><div style={{ border: '1px solid #ddd', padding: '8px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff' }}><span style={{ color: currentCert.file ? '#333' : '#999', fontSize: '0.9rem' }}>{currentCert.file ? "File Selected" : "Not Uploaded"}</span><span style={{ fontSize: '1.2rem', color: '#666' }}>⋮</span></div></div>
             </PopupModal>
         </form>
     );
 };
 
 // --- FINAL SUBMIT BUTTON SECTION ---
-const Preferences = ({ data, onChange, onReset,onSubmitFinal }) => {
-    const NumRegix = /[^0-9]/;
+const Preferences = ({ data, onChange, onReset, onSubmitFinal, saving }) => {
+    const NumRegex = /^\d+$/;
     const [errors, setErrors] = useState({});
-    const handleSubmit = (e) => {
-       
-        const newErrors = {};
-        if (!data.currentCTC) newErrors.currentCTC = "Required";
-         else if(NumRegix.test(data.currentCTC)) newErrors.currentCTC ="Salary in Numbers" ;
 
-        if (!data.expectedCTC) newErrors.expectedCTC = "Required";
-            else if(NumRegix.test(data.expectedCTC)) newErrors.expectedCTC ="Salary in Numbers" ;
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        const newErrors = {};
+
+        // ✅ Current CTC
+        if (!data.currentCTC) {
+            newErrors.currentCTC = "Required";
+        } else if (!NumRegex.test(data.currentCTC)) {
+            newErrors.currentCTC = "Salary in numbers only";
+        }
+
+        // ✅ Expected CTC
+        if (!data.expectedCTC) {
+            newErrors.expectedCTC = "Required";
+        } else if (!NumRegex.test(data.expectedCTC)) {
+            newErrors.expectedCTC = "Salary in numbers only";
+        }
+
+        // ✅ Other validations
         if (!data.jobType || data.jobType === 'Select') {
-            newErrors.jobType = "Please select a job type";}
+            newErrors.jobType = "Please select a job type";
+        }
         if (!data.role) newErrors.role = "Required";
         if (!data.ready) newErrors.ready = "Please select your availability";
         if (!data.relocate) newErrors.relocate = "Please select relocation preference";
-   
-       
+
         setErrors(newErrors);
+
         if (Object.keys(newErrors).length === 0) {
-         onSubmitFinal()
-        } else {
-            
+            onSubmitFinal();
         }
     };
-    
-    return (
-    <form className="content-card" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-        <div className="profile-header">
-            <h2>Preferences / Career Details</h2>
-            <button type="button" className="reset-link" onClick={onReset}>Reset</button>
-        </div>
-        <div className="form-grid">
-            <div className="form-group"><label>Current CTC</label><input type="text" name="currentCTC" value={data.currentCTC} onChange={onChange} placeholder='Enter your Current CTC'/>
-            {errors.currentCTC && <span className="error-msg">{errors.currentCTC}</span>}</div>
-            <div className="form-group"><label>Expected CTC</label><input type="text" name="expectedCTC" value={data.expectedCTC} onChange={onChange} placeholder='Enter your Expected CTC'/>
-            {errors.expectedCTC && <span className="error-msg">{errors.expectedCTC}</span>}</div>  
-            <div className="form-group"><label>Preferred Job Type</label><select name="jobType" value={data.jobType} onChange={onChange}><option value="Select">Select</option><option value="Full-time">Full-time</option><option value="Part-time">Part-time</option><option value="Internship">Internship</option><option value="Contract">Contract</option></select>
-            {errors.jobType && <span className="error-msg">{errors.jobType}</span>}</div>  
-            <div className="form-group"><label>Preferred Industry/Role</label><input type="text" name="role" value={data.role || ''} onChange={onChange} placeholder='Enter preferred industry/role'/>
-            {errors.role && <span className="error-msg">{errors.role}</span>}</div>
-        </div>
-        
-        <div style={{ display: 'flex', flexDirection: "column" , gap: '2rem', marginTop: '2rem' }}>
-            <div style={{ display: 'flex' , gap: '12rem' }}>
-                <div>
-                    <label style={{ display: 'block', marginBottom: '0.8rem', fontWeight: '500', fontSize: '0.9rem' }}>Ready to work</label>
-                    <small>Inform employers that you’re available to begin immediately.</small>
-                     {errors.ready && <span className="error-msg">{errors.ready}</span>}
-                </div>
-                <div style={{ display: 'flex', alignItems: "center" , gap: '1.5rem' }}>
-                    <label style={{display:'flex', gap:'5px', cursor:'pointer'}}><input type="radio" name="ready" value="Yes" checked={data.ready === "Yes"} onChange={onChange} /> Yes</label>
-                    <label style={{display:'flex', gap:'5px', cursor:'pointer'}}><input type="radio" name="ready" value="No" checked={data.ready === "No"} onChange={onChange} /> No</label>
-                    
-                </div>
-            </div>
-            <div style={{ display: 'flex' , gap: '12rem' }}>
-                <div>
-                    <label style={{ display: 'block', marginBottom: '0.8rem', fontWeight: '500', fontSize: '0.9rem' }}>Willing to Relocate</label>
-                    <small>Inform employers that you’re available to begin immediately.</small>
-                    {errors.relocate && <span className="error-msg">{errors.relocate}</span>}
-                </div>
-                <div style={{ display: 'flex', alignItems: "center" , gap: '1.5rem' }}>
-                    <label style={{display:'flex', gap:'5px', cursor:'pointer'}}><input type="radio" name="relocate" value="Yes" checked={data.relocate === "Yes"} onChange={onChange} /> Yes</label>
-                    <label style={{display:'flex', gap:'5px', cursor:'pointer'}}><input type="radio" name="relocate" value="No" checked={data.relocate === "No"} onChange={onChange} /> No</label>
-                </div>
-            </div>
-        </div>
 
-        <div className="form-actions"><button type="submit"  className="btn btn-primary">Save & Continue</button></div>
-    </form>
-)};
+    return (
+        <form className="content-card" onSubmit={handleSubmit}>
+            <div className="profile-header">
+                <h2>Preferences / Career Details</h2>
+                <button type="button" className="reset-link" onClick={onReset}>Reset</button>
+            </div>
+            <div className="form-grid">
+                <div className="form-group"><label>Current CTC</label><input type="text" name="currentCTC" value={data.currentCTC} onChange={onChange} placeholder='Enter your Current CTC' />
+                    {errors.currentCTC && <span className="error-msg">{errors.currentCTC}</span>}</div>
+                <div className="form-group"><label>Expected CTC</label><input type="text" name="expectedCTC" value={data.expectedCTC} onChange={onChange} placeholder='Enter your Expected CTC' />
+                    {errors.expectedCTC && <span className="error-msg">{errors.expectedCTC}</span>}</div>
+                <div className="form-group"><label>Preferred Job Type</label><select name="jobType" value={data.jobType} onChange={onChange}><option value="Select">Select</option><option value="Full-time">Full-time</option><option value="Part-time">Part-time</option><option value="Internship">Internship</option><option value="Contract">Contract</option></select>
+                    {errors.jobType && <span className="error-msg">{errors.jobType}</span>}</div>
+                <div className="form-group"><label>Preferred Industry/Role</label><input type="text" name="role" value={data.role || ''} onChange={onChange} placeholder='Enter preferred industry/role' />
+                    {errors.role && <span className="error-msg">{errors.role}</span>}</div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: "column", gap: '2rem', marginTop: '2rem' }}>
+                <div style={{ display: 'flex', gap: '12rem' }}>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.8rem', fontWeight: '500', fontSize: '0.9rem' }}>Ready to work</label>
+                        <small>Inform employers that you’re available to begin immediately.</small>
+                        {errors.ready && <span className="error-msg">{errors.ready}</span>}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: "center", gap: '1.5rem' }}>
+                        <label style={{ display: 'flex', gap: '5px', cursor: 'pointer' }}><input type="radio" name="ready" value="Yes" checked={data.ready === "Yes"} onChange={onChange} /> Yes</label>
+                        <label style={{ display: 'flex', gap: '5px', cursor: 'pointer' }}><input type="radio" name="ready" value="No" checked={data.ready === "No"} onChange={onChange} /> No</label>
+
+                    </div>
+                </div>
+                <div style={{ display: 'flex', gap: '12rem' }}>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.8rem', fontWeight: '500', fontSize: '0.9rem' }}>Willing to Relocate</label>
+                        <small>Inform employers that you’re available to begin immediately.</small>
+                        {errors.relocate && <span className="error-msg">{errors.relocate}</span>}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: "center", gap: '1.5rem' }}>
+                        <label style={{ display: 'flex', gap: '5px', cursor: 'pointer' }}><input type="radio" name="relocate" value="Yes" checked={data.relocate === "Yes"} onChange={onChange} /> Yes</label>
+                        <label style={{ display: 'flex', gap: '5px', cursor: 'pointer' }}><input type="radio" name="relocate" value="No" checked={data.relocate === "No"} onChange={onChange} /> No</label>
+                    </div>
+                </div>
+            </div>
+
+            <div className="form-actions">
+                <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={saving}
+                >
+                    {saving ? "Saving..." : "Save & Continue"}
+                </button>
+            </div>
+        </form>
+    )
+};
 
 // --- MAIN COMPONENT ---
 
 export const MyProfile = () => {
     const [openDropdown, setOpenDropdown] = useState('Basic Details');
     const [activeItem, setActiveItem] = useState('Profile');
+    const [profilePhoto, setProfilePhoto] = useState(null);
+    const [resumeFile, setResumeFile] = useState(null);
+    const [saving, setSaving] = useState(false);
+
+
 
     // ORDER of Steps for Navigation
     const steps = [
-        'Profile', 
-        'Current Details', 
-        'Contact Details', 
-        'Resume', 
-        'Education Details', 
-        'Work Experience', 
-        'Key Skills', 
-        'Languages Known', 
-        'Certifications', 
+        'Profile',
+        'Current Details',
+        'Contact Details',
+        'Resume',
+        'Education Details',
+        'Work Experience',
+        'Key Skills',
+        'Languages Known',
+        'Certifications',
         'Preferences / Career Details'
     ];
 
     const [allData, setAllData] = useState({
         profile: { fullName: '', gender: 'Select', dob: '', maritalStatus: 'Select', nationality: '' },
-        currentDetails: { jobTitle: '', company: '', experience: '', currentLocation: '', prefLocation: '' },
+        currentDetails: { jobTitle: '', company: '', experience: '', noticePeriod: 'Select', currentLocation: '', prefLocation: '' },
         contact: { mobile: '', altMobile: '', email: '', altEmail: '', address: '', street: '', city: '', state: '', pincode: '', country: '' },
         resume: { portfolio: '' },
         education: { highestQual: 'Select', sslc: { institution: '', percentage: '', location: '', year: '' }, hsc: { stream: 'Select', institution: '', location: '', year: '', percentage: '' }, graduations: [{ id: 1, degree: '', status: 'Select', dept: '', percentage: '', startYear: '', endYear: '', college: '', city: '', state: '', country: '' }] },
@@ -730,8 +863,63 @@ export const MyProfile = () => {
         skills: ["User Research", "Problem solving", "Figma"],
         languages: [{ name: "English", proficiency: "Fluent" }, { name: "Tamil", proficiency: "Native" }],
         certs: [{ name: "Full-Stack Development", file: "cert1.pdf" }, { name: "UI/UX Design", file: "cert2.pdf" }],
-        preferences: [{ currentCTC: '', expectedCTC: '', jobType: 'Select', role: '', ready: '', relocate: '' }]
+        preferences: {
+            currentCTC: '', expectedCTC: '', jobType: 'Select', role: '', ready: '', relocate: ''
+        }
     });
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const res = await api.get("profile/jobseeker/");
+                setAllData(prev => ({
+                    ...prev,
+                    profile: {
+                        fullName: res.data.full_name || "",
+                        gender: res.data.gender || "Select",
+                        dob: res.data.dob || "",
+                        maritalStatus: res.data.marital_status || "Select",
+                        nationality: res.data.nationality || "",
+                    },
+                    currentDetails: {
+                        jobTitle: res.data.current_job_title || "",
+                        company: res.data.current_company || "",
+                        experience: res.data.total_experience_years || "",
+                        noticePeriod: res.data.notice_period || "Select",
+                        currentLocation: res.data.current_location || "",
+                        prefLocation: res.data.preferred_locations || "",
+                    },
+                    contact: {
+                        mobile: res.data.phone || "",
+                        email: res.data.email || "",
+                        altMobile: res.data.alternate_phone || "",
+                        altEmail: res.data.alternate_email || "",
+                        address: res.data.full_address || "",
+                        street: res.data.street || "",
+                        city: res.data.city || "",
+                        state: res.data.state || "",
+                        pincode: res.data.pincode || "",
+                        country: res.data.country || "",
+                    },
+                    preferences: {
+                        currentCTC: res.data.current_ctc || "",
+                        expectedCTC: res.data.expected_ctc || "",
+                        jobType: res.data.preferred_job_type || "Select",
+                        role: res.data.preferred_role_industry || "",
+                        ready: res.data.ready_to_start_immediately ? "Yes" : "No",
+                        relocate: res.data.willing_to_relocate ? "Yes" : "No",
+                    }
+                }));
+
+            } catch (err) {
+                console.error("Failed to load profile", err);
+                if (err.response?.status === 401) {
+                    alert("Session expired. Please login again.");
+                }
+            }
+        };
+
+        fetchProfile();
+    }, []);
 
     // --- NAVIGATION LOGIC ---
     const handleNextStep = () => {
@@ -739,136 +927,242 @@ export const MyProfile = () => {
         if (currentIndex < steps.length - 1) {
             const nextItem = steps[currentIndex + 1];
             setActiveItem(nextItem);
-            
+
             // Auto-open Dropdowns
             if (['Profile', 'Current Details', 'Contact Details'].includes(nextItem)) setOpenDropdown('Basic Details');
             else if (['Key Skills', 'Languages Known', 'Certifications'].includes(nextItem)) setOpenDropdown('Skills & Certifications');
         }
     };
 
-   const handleFinalSubmit = () => {
-    const today = new Date().toISOString().split('T')[0];
-    const AlphaOnlyreg =  /^[A-Za-z]+(?: [A-Za-z]+)*$/;
-    const percentageReg = /^(\d{1,2}(\.\d{1,2})?|100(\.0{1,2})?)%?$/;
+    const handleFinalSubmit = async () => {
+        if (saving) return;
+        setSaving(true);
+
+        const today = new Date().toISOString().split('T')[0];
+        const AlphaOnlyreg = /^[A-Za-z]+(?: [A-Za-z]+)*$/;
+        const percentageReg = /^(\d{1,2}(\.\d{1,2})?|100(\.0{1,2})?)%?$/;
+
+
+        // --- 1. PROFILE VALIDATION ---
+        const profile = allData.profile;
+        const isProfileValid =
+            profile.fullName?.trim() &&
+            AlphaOnlyreg.test(profile.fullName) &&
+            profile.gender !== "Select" &&
+            profile.dob &&
+            profile.dob <= today &&
+            profile.maritalStatus !== "Select" &&
+            profile.nationality?.trim();
+
+        if (!isProfileValid) {
+            alert("*fill the Required field in the Profile section.");
+            return;
+        }
+
+        const current = allData.currentDetails;
+        const isCurrentdetailsValid =
+            current.company.trim() &&
+            current.currentLocation.trim() &&
+            current.experience &&
+            current.jobTitle.trim() &&
+            current.prefLocation.trim() &&
+            current.noticePeriod !== 'Select';
 
 
 
-    // --- 1. Current Details VALIDATION ---
-    
-    
-    // --- 2. PROFILE VALIDATION ---
-    const profile = allData.profile;
-    const isProfileValid = 
-        profile.fullName?.trim() && 
-        AlphaOnlyreg.test(profile.fullName) &&
-        profile.gender !== "Select" &&
-        profile.dob && 
-        profile.dob <= today &&
-        profile.maritalStatus !== "Select" &&
-        profile.nationality?.trim();
 
-    if (!isProfileValid) {
-        alert("*fill the Required field in the Profile section.");
-        return;
-    }
 
-    const CurrentDetails = allData.currentDetails;
-    const isCurrentdetailsValid = 
-        CurrentDetails.company.trim() &&
-        CurrentDetails.currentLocation.trim() &&
-        CurrentDetails.experience &&
-        CurrentDetails.jobTitle.trim() &&
-        CurrentDetails.prefLocation.trim()
-        
+        if (!isCurrentdetailsValid) {
+            alert("*fill the Required field in the Current Details section.");
+            return;
+        }
 
-    if (!isCurrentdetailsValid) {
-        alert("*fill the Required field in the Current Details section.");
-        return;
-    }
+        // --- 2. EDUCATION VALIDATION ---
+        const edu = allData.education;
+        const isSslcValid =
+            edu.sslc.institution &&
+            edu.sslc.location &&
+            edu.sslc.year &&
+            edu.sslc.year <= today &&
+            percentageReg.test(edu.sslc.percentage);
 
-    // --- 2. EDUCATION VALIDATION ---
-    const edu = allData.education;
-    const isSslcValid = 
-        edu.sslc.institution && 
-        edu.sslc.location && 
-        edu.sslc.year && 
-        edu.sslc.year <= today &&
-        percentageReg.test(edu.sslc.percentage);
+        const isHscValid =
+            edu.hsc.stream !== 'Select' &&
+            edu.hsc.institution &&
+            edu.hsc.year &&
+            edu.hsc.year <= today &&
+            percentageReg.test(edu.hsc.percentage);
 
-    const isHscValid = 
-        edu.hsc.stream !== 'Select' &&
-        edu.hsc.institution &&
-        edu.hsc.year &&
-        edu.hsc.year <= today &&
-        percentageReg.test(edu.hsc.percentage);
+        if (!isSslcValid || !isHscValid) {
+            alert("*required SSLC and HSC details with valid percentages and years.");
+            return;
+        }
+        const Contactdetails = allData.contact;
+        const isContactdetailsValid =
+            Contactdetails.mobile &&
+            Contactdetails.email.trim() &&
+            Contactdetails.city.trim() &&
+            Contactdetails.country.trim() &&
+            Contactdetails.state.trim() &&
+            Contactdetails.street.trim() &&
+            Contactdetails.pincode;
 
-    if (!isSslcValid || !isHscValid) {
-        alert( "*required SSLC and HSC details with valid percentages and years.");
-        return;
-    }
-     const Contactdetails = allData.contact;
-    const isContactdetailsValid = 
-        Contactdetails.email.trim() &&
-        Contactdetails.mobile &&
-        Contactdetails.altMobile &&
-        Contactdetails.email &&
-        Contactdetails.altEmail &&
-        Contactdetails.city.trim() &&
-        Contactdetails.country.trim() &&
-        Contactdetails.state.trim() &&
-        Contactdetails.street.trim() &&
-        Contactdetails.pincode
-        
 
-    if (!isContactdetailsValid) {
-        alert("*fill the Required field in the Contact Details section");
-        return;
-    }
 
-    // --- 3. WORK EXPERIENCE VALIDATION ---
-    const work = allData.experience;
-    let isWorkValid = true;
-    if (work.status === 'Experienced') {
-        // Check if all entries have the core required fields
-        isWorkValid = work.entries.every(entry => 
-            entry.title?.trim() !== "" && entry.company?.trim() !== ""
-        );
-    }
+        if (!isContactdetailsValid) {
+            alert("*fill the Required field in the Contact Details section");
+            return;
+        }
 
-    if (!isWorkValid) {
-        alert("*Work experience details Required.");
-        return;
-    }
- 
-    // const Preferences = allData.preferences;
-    // let IsPreferencesValid = true;
-    // if (Preferences.currentCTC === '') {
-    //     IsPreferencesValid = Preferences.entries.every(pref => 
-    //         pref.currentCTC?.trim() !=="" &&  pref.expectedCTC?.trim() !== ""
-    //     );
-    // }
+        // --- 3. WORK EXPERIENCE VALIDATION ---
+        const work = allData.experience;
+        let isWorkValid = true;
+        if (work.status === 'Experienced') {
+            // Check if all entries have the core required fields
+            isWorkValid = work.entries.every(entry =>
+                entry.title?.trim() !== "" && entry.company?.trim() !== ""
+            );
+        }
 
-    // if (!isWorkValid) {
-    //     alert("*Work experience details Required.");
-    //     return;
-    // }
-    // --- FINAL EXECUTION ---
-    if (isProfileValid && isSslcValid && isHscValid && isWorkValid ) {
-        console.log("FINAL SUBMISSION DATA:", allData);
-       
-        alert("Your profile has been saved successfully!");
-    }
-};
+        if (!isWorkValid) {
+            alert("*Work experience details Required.");
+            return;
+        }
+
+        // --- 4. PREFERENCES VALIDATION ---
+        const prefs = allData.preferences;
+
+        const NumRegex = /^\d+$/;
+
+        if (
+            !NumRegex.test(prefs.currentCTC) ||
+            !NumRegex.test(prefs.expectedCTC)
+        ) {
+            alert("*CTC values must be numbers only.");
+            return;
+        }
+
+        const isPreferencesValid =
+            prefs.currentCTC &&
+            prefs.expectedCTC &&
+            prefs.jobType !== 'Select' &&
+            prefs.role &&
+            prefs.ready &&
+            prefs.relocate;
+
+        if (!isPreferencesValid) {
+            alert("*Fill required fields in Preferences section.");
+            return;
+        }
+
+        if (isProfileValid && isSslcValid && isHscValid && isWorkValid && isPreferencesValid) {
+            try {
+                const formData = new FormData();
+
+                // 🔹 Profile photo
+                if (profilePhoto instanceof File) {
+                    formData.append("profile_photo", profilePhoto);
+                }
+
+                // 🔹 Resume file
+                if (resumeFile instanceof File) {
+                    formData.append("resume_file", resumeFile);
+                }
+
+
+
+                // 🔹 Profile
+                formData.append("full_name", allData.profile.fullName);
+                formData.append("gender", allData.profile.gender);
+                formData.append("dob", allData.profile.dob);
+                formData.append("marital_status", allData.profile.maritalStatus);
+                formData.append("nationality", allData.profile.nationality);
+                formData.append("current_job_title", allData.currentDetails.jobTitle);
+                formData.append("current_company", allData.currentDetails.company);
+                formData.append("total_experience_years", allData.currentDetails.experience);
+                formData.append("notice_period", allData.currentDetails.noticePeriod);
+                formData.append("current_location", allData.currentDetails.currentLocation);
+                formData.append("preferred_locations", allData.currentDetails.prefLocation);
+                formData.append("phone", allData.contact.mobile);
+                formData.append("email", allData.contact.email);
+                formData.append("alternate_phone", allData.contact.altMobile);
+                formData.append("alternate_email", allData.contact.altEmail);
+                formData.append("full_address", allData.contact.address);
+                formData.append("street", allData.contact.street);
+                formData.append("city", allData.contact.city);
+                formData.append("state", allData.contact.state);
+                formData.append("pincode", allData.contact.pincode);
+                formData.append("country", allData.contact.country);
+                formData.append("current_ctc", allData.preferences.currentCTC);
+                formData.append("expected_ctc", allData.preferences.expectedCTC);
+                formData.append("preferred_job_type", allData.preferences.jobType);
+                formData.append("preferred_role_industry", allData.preferences.role);
+                formData.append(
+                    "ready_to_start_immediately",
+                    allData.preferences.ready === "Yes"
+                );
+                formData.append(
+                    "willing_to_relocate",
+                    allData.preferences.relocate === "Yes"
+                );
+                // 🔹 Portfolio
+                formData.append("portfolio", allData.resume.portfolio);
+                // 🔹 Education
+                formData.append("education", JSON.stringify(allData.education));
+                // 🔹 Work Experience
+                formData.append("experience", JSON.stringify(allData.experience));
+                // 🔹 Skills
+                formData.append("skills", JSON.stringify(allData.skills));
+
+                // 🔹 Languages
+                formData.append("languages", JSON.stringify(allData.languages));
+
+                // 🔹 Certifications
+                formData.append("certifications", JSON.stringify(allData.certs));
+
+
+
+
+
+                // (You can append more fields later)
+
+                try {
+                    await api.patch("profile/jobseeker/", formData, {
+                        headers: { "Content-Type": "multipart/form-data" },
+                    });
+
+                    alert("Profile saved successfully!");
+                } catch (err) {
+                    console.error("Profile save failed", err);
+                    alert("Failed to save profile. Try again.");
+                } finally {
+                    setSaving(false); // ✅ VERY IMPORTANT
+                }
+            } catch (err) {
+                console.error("Profile save failed", err);
+                alert("Failed to save profile. Try again.");
+            }
+
+
+        }
+    };
 
     const handleUpdate = (section, e) => {
         const { name, value } = e.target;
-        setAllData(prev => ({ ...prev, [section]: { ...prev[section], [name]: value } }));
+        setAllData(prev => ({
+            ...prev,
+            [section]: {
+                ...prev[section],
+                [name]: value
+            }
+        }));
     };
+
 
     // --- Education Handlers ---
     const handleUpdateSSLC = (e) => {
         const { name, value } = e.target;
-        if(name === 'highestQual') setAllData(prev => ({ ...prev, education: { ...prev.education, highestQual: value } }));
+        if (name === 'highestQual') setAllData(prev => ({ ...prev, education: { ...prev.education, highestQual: value } }));
         else setAllData(prev => ({ ...prev, education: { ...prev.education, sslc: { ...prev.education.sslc, [name]: value } } }));
     };
     const handleUpdateHSC = (e) => {
@@ -904,21 +1198,24 @@ export const MyProfile = () => {
     const handleReset = (section) => {
         const defaults = {
             profile: { fullName: '', gender: 'Select', dob: '', maritalStatus: 'Select', nationality: '' },
-            currentDetails: { jobTitle: '', company: '', experience: '', currentLocation: '', prefLocation: '' },
+            currentDetails: { jobTitle: '', company: '', experience: '', noticePeriod: 'Select', currentLocation: '', prefLocation: '' },
             contact: { mobile: '', altMobile: '', email: '', altEmail: '', address: '', street: '', city: '', state: '', pincode: '', country: '' },
             resume: { portfolio: '' },
             education: { highestQual: 'Select', sslc: { institution: '', percentage: '', location: '', year: '' }, hsc: { stream: 'Select', institution: '', location: '', year: '', percentage: '' }, graduations: [{ id: Date.now(), degree: '', status: 'Select', dept: '', percentage: '', startYear: '', endYear: '', college: '', city: '', state: '', country: '' }] },
-            skills :[],
-            experience: { status: '', hasExperience: 'No', entries: [{ id: Date.now(), title: '', company: '', startDate: '', endDate: '', industry: 'Select', jobType: 'Select', location: '', responsibilities: '' }] },
+            skills: [],
+            experience: { status: 'Fresher', hasExperience: 'No', entries: [{ id: Date.now(), title: '', company: '', startDate: '', endDate: '', industry: 'Select', jobType: 'Select', location: '', responsibilities: '' }] },
             preferences: { currentCTC: '', expectedCTC: '', jobType: 'Select', role: '', ready: '', relocate: '' },
-            languages:[],
-            certs:[],
-            
+            languages: [],
+            certs: [],
+
 
         };
 
-        if ([].includes(section))
-             return;
+        if (['skills', 'languages', 'certs'].includes(section)) {
+            setAllData(prev => ({ ...prev, [section]: [] }));
+            return;
+        }
+
 
         setAllData(prev => ({ ...prev, [section]: defaults[section] }));
 
@@ -939,25 +1236,34 @@ export const MyProfile = () => {
 
     const renderContent = () => {
         switch (activeItem) {
-            case 'Profile': return <Profile data={allData.profile} onChange={(e) => handleUpdate('profile', e)} onReset={() => handleReset('profile')} onNext={handleNextStep} />;
+            case 'Profile': return (<Profile data={allData.profile} onChange={(e) => handleUpdate('profile', e)} onReset={() => handleReset('profile')} onNext={handleNextStep} setProfilePhoto={setProfilePhoto} />);
             case 'Current Details': return <CurrentDetails data={allData.currentDetails} onChange={(e) => handleUpdate('currentDetails', e)} onReset={() => handleReset('currentDetails')} onNext={handleNextStep} />;
             case 'Contact Details': return <ContactDetails data={allData.contact} onChange={(e) => handleUpdate('contact', e)} onReset={() => handleReset('contact')} onNext={handleNextStep} />;
-            case 'Resume': return <ResumeSection data={allData.resume} onChange={(e) => handleUpdate('resume', e)} onReset={() => handleReset('resume')} onNext={handleNextStep} />;
+            case 'Resume': return (<ResumeSection data={allData.resume} onChange={(e) => handleUpdate('resume', e)} onReset={() => handleReset('resume')} onNext={handleNextStep} setResumeFile={setResumeFile} resumeFile={resumeFile} />);
             case 'Education Details': return <EducationDetails data={allData.education} onUpdateSSLC={handleUpdateSSLC} onUpdateHSC={handleUpdateHSC} onUpdateGrad={handleUpdateGrad} onAddGrad={handleAddGrad} onRemoveGrad={handleRemoveGrad} onReset={() => handleReset('education')} onNext={handleNextStep} />;
             case 'Work Experience': return <WorkExperience data={allData.experience} onChange={(e) => handleUpdate('experience', e)} onUpdateEntry={handleExpUpdateEntry} onAddEntry={handleAddExpEntry} onRemoveEntry={handleRemoveExpEntry} onReset={() => handleReset('experience')} onNext={handleNextStep} />;
             case 'Key Skills': return <KeySkills skills={allData.skills} onAdd={(item) => handleArrayAdd('skills', item)} onUpdate={(idx, item) => handleArrayUpdate('skills', idx, item)} onDelete={(idx) => handleArrayDelete('skills', idx)} onReset={() => handleReset('skills')} onNext={handleNextStep} />;
             case 'Languages Known': return <LanguagesKnown languages={allData.languages} onAdd={(item) => handleArrayAdd('languages', item)} onUpdate={(idx, item) => handleArrayUpdate('languages', idx, item)} onDelete={(idx) => handleArrayDelete('languages', idx)} onReset={() => handleReset('languages')} onNext={handleNextStep} />;
             case 'Certifications': return <Certifications certs={allData.certs} onAdd={(item) => handleArrayAdd('certs', item)} onUpdate={(idx, item) => handleArrayUpdate('certs', idx, item)} onDelete={(idx) => handleArrayDelete('certs', idx)} onReset={() => handleReset('certs')} onNext={handleNextStep} />;
-            
+
             // Final Step -> Submit
-            case 'Preferences / Career Details': return <Preferences data={allData.preferences} onChange={(e) => handleUpdate('preferences', e)} onReset={() => handleReset('preferences')} onSubmitFinal={handleFinalSubmit} />;
+            case 'Preferences / Career Details':
+                return (
+                    <Preferences
+                        data={allData.preferences}
+                        onChange={(e) => handleUpdate('preferences', e)}
+                        onReset={() => handleReset('preferences')}
+                        onSubmitFinal={handleFinalSubmit}
+                        saving={saving}
+                    />
+                );
             default: return <Profile data={allData.profile} onChange={(e) => handleUpdate('profile', e)} onReset={() => handleReset('profile')} onNext={handleNextStep} />;
         }
     };
 
     return (
         <div>
-            <JHeader/>
+            <JHeader />
             <main>
                 <div className='profile-main-desc'>
                     <h1>My Profile</h1>

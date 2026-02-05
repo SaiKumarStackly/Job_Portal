@@ -46,11 +46,11 @@ export const Jsignup = () => {
 
     if (!formValues.username.trim()) {
       newErrors.username = "Username is required"
-    } else if (formValues.username.length < 4 ) {
+    } else if (formValues.username.length < 4) {
       newErrors.username = "Username must be at least 4 characters"
-    } else if (formValues.username.length > 20 ) {
+    } else if (formValues.username.length > 20) {
       newErrors.username = "Username should not exceed 20 characters"
-    } else if (!regexofUserName.test(formValues.username)){
+    } else if (!regexofUserName.test(formValues.username)) {
       newErrors.username = "Invalid username Format"
     }
 
@@ -85,29 +85,41 @@ export const Jsignup = () => {
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
- 
-const handleSubmit = (e) => {
-  e.preventDefault();
 
-  axios.post("http://127.0.0.1:8000/api/jobseeker/signup/", {
-    username: formValues.username,
-    email: formValues.email,
-    password: formValues.password,
-    password2: formValues.confirmpassword,
-  })
-  .then((res) => {
-    localStorage.setItem("access", res.data.access);
-    localStorage.setItem("refresh", res.data.refresh);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    navigate("/Job-portal/jobseeker/login");
-  })
-  .catch((err) => {
-    console.log(err.response?.data);
-  });
-};
+    if (!validateForm()) return;
 
+    try {
+      const res = await axios.post(
+        "http://127.0.0.1:8000/api/register/jobseeker/",
+        {
+          username: formValues.username,
+          email: formValues.email,
+          phone: formValues.phone || null,
+          password: formValues.password,
+          password_confirm: formValues.confirmpassword,
+        }
+      );
 
+      alert("Registration successful! Please login.");
+      navigate("/Job-portal/jobseeker/login");
 
+    } catch (err) {
+      const apiErrors = err.response?.data;
+
+      if (apiErrors) {
+        const newErrors = {};
+        Object.keys(apiErrors).forEach((key) => {
+          newErrors[key] = apiErrors[key][0];
+        });
+        setErrors(newErrors);
+      } else {
+        console.error(err);
+      }
+    }
+  };
 
   return (
     <div className="j-sign-up-page">
@@ -128,7 +140,7 @@ const handleSubmit = (e) => {
           <img src={workTime} alt="Signup Illustration" />
         </div>
 
-       <form onSubmit={handleSubmit} className="j-sign-up-form">
+        <form onSubmit={handleSubmit} className="j-sign-up-form">
           <h2>Sign up for Jobseeker</h2>
 
           <label>User name</label>
@@ -158,8 +170,8 @@ const handleSubmit = (e) => {
           {errors.phone && <span className="error-msg">{errors.phone}</span>}
 
           <button type="submit" className="j-sign-up-submit">
-  Signup
-</button>
+            Signup
+          </button>
 
 
           <div className="divider">Or Continue with</div>
