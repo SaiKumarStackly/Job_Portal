@@ -103,9 +103,8 @@ from .serializers import (
 )
 
 
-# ────────────────────────────────────────────────
+
 # Company Views
-# ────────────────────────────────────────────────
 
 class CompanyListView(generics.ListAPIView):
     permission_classes = [AllowAny]
@@ -158,9 +157,9 @@ class CompanyLinkView(generics.UpdateAPIView):
         serializer.instance.company = company
         serializer.instance.save()
 
-# ────────────────────────────────────────────────
-# NEW: Employer can edit their own company details
-# ────────────────────────────────────────────────
+
+# Employer can edit their own company details
+
 
 class CompanyEditView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
@@ -194,9 +193,8 @@ class AdminCompanyToggleActiveView(generics.UpdateAPIView):
         serializer.save()
 
 
-# ────────────────────────────────────────────────
+
 # Job Views
-# ────────────────────────────────────────────────
 
 class JobListView(generics.ListAPIView):
     permission_classes = [AllowAny]
@@ -260,9 +258,7 @@ class JobToggleActiveView(generics.UpdateAPIView):
         serializer.save()
 
 
-# ────────────────────────────────────────────────
 # Job Application & Saved Jobs
-# ────────────────────────────────────────────────
 
 class ApplyJobView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
@@ -296,9 +292,8 @@ class SavedJobsListView(generics.ListAPIView):
         return SavedJob.objects.filter(user=self.request.user)
 
 
-# ────────────────────────────────────────────────
+
 # Employer: Applications for their jobs
-# ────────────────────────────────────────────────
 
 class EmployerApplicationsListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]

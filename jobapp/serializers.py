@@ -249,7 +249,7 @@ class EmployerProfileReadSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'full_name', 'employee_id', 'company', 'created_at', 'updated_at']
 
 
-# EmployerProfile Write Serializer — updated (no company_name)
+# EmployerProfile Write Serializer 
 class EmployerProfileWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmployerProfile
@@ -267,7 +267,7 @@ class EmployerProfileWriteSerializer(serializers.ModelSerializer):
         return value
 
 
-# Job Read Serializer — no change needed
+# Job Read Serializer 
 class JobReadSerializer(serializers.ModelSerializer):
     company = CompanySerializer(read_only=True)
     posted_by = serializers.CharField(source='posted_by.username', read_only=True, default='Company Jobs')
@@ -366,7 +366,7 @@ class JobUpdateSerializer(serializers.ModelSerializer):
 
         return data
 
-# JobApplication & SavedJob — no change needed
+# JobApplication & SavedJob 
 class JobApplicationWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobApplication
