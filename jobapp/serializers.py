@@ -58,17 +58,15 @@ class JobSeekerRegistrationSerializer(UserRegistrationSerializer):
         return user
 
 
+# Employer Registration — no company_name, no full_name
 class EmployerRegistrationSerializer(UserRegistrationSerializer):
-    company_name = serializers.CharField(max_length=200, required=True)
-
     class Meta(UserRegistrationSerializer.Meta):
-        fields = UserRegistrationSerializer.Meta.fields + ['company_name']
+        fields = UserRegistrationSerializer.Meta.fields
 
     def create(self, validated_data):
-        company_name = validated_data.pop('company_name')
         validated_data['user_type'] = User.UserType.EMPLOYER
         user = super().create(validated_data)
-        EmployerProfile.objects.create(user=user, company_name=company_name)
+        EmployerProfile.objects.create(user=user)
         return user
 
 
@@ -203,27 +201,7 @@ class JobSeekerProfileWriteSerializer(WritableNestedModelSerializer):
         return data
 
 
-class EmployerProfileReadSerializer(serializers.ModelSerializer):
-    user = UserReadSerializer(read_only=True)
-    logo_url = serializers.SerializerMethodField()
 
-    class Meta:
-        model = EmployerProfile
-        fields = '__all__'
-
-    def get_logo_url(self, obj):
-        return obj.logo.url if obj.logo else None
-
-
-class EmployerProfileWriteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = EmployerProfile
-        exclude = ['id', 'user', 'company_id', 'created_at', 'updated_at', 'ratings', 'review_count']
-
-    def validate(self, data):
-        if 'company_name' in data and (not data['company_name'] or not data['company_name'].strip()):
-            raise serializers.ValidationError({"company_name": "Company name is required and cannot be empty."})
-        return data
 
 
 class AdminProfileReadSerializer(serializers.ModelSerializer):
@@ -240,34 +218,59 @@ class AdminProfileWriteSerializer(serializers.ModelSerializer):
         exclude = ['id', 'user', 'created_at', 'updated_at']
 
 
-
-# Company & Job Serializers 
-
-
+# Company Serializer — full & supports create/update/disable
 class CompanySerializer(serializers.ModelSerializer):
-    name = serializers.CharField()  # matches model
     logo_url = serializers.SerializerMethodField(read_only=True)
-    review_count = serializers.IntegerField(read_only=True)  # matches model
+    custom_id = serializers.CharField(read_only=True)  # auto-generated
 
     class Meta:
         model = Company
         fields = [
-            'id', 'name', 'logo', 'logo_url',
-            'rating', 'review_count',
-            'description', 'website'
+            'id', 'custom_id', 'name', 'logo', 'logo_url',
+            'slogan', 'rating', 'review_count',
+            'description', 'website', 'industry',
+            'employee_count', 'founded_year', 'company_address',
+            'is_active'
         ]
+        read_only_fields = ['id', 'custom_id', 'rating', 'review_count', 'is_active']
 
     def get_logo_url(self, obj):
-        return obj.logo.url if obj.logo else ""
+        return obj.logo.url if obj.logo else None
 
 
+
+# EmployerProfile Read Serializer
+class EmployerProfileReadSerializer(serializers.ModelSerializer):
+    user = UserReadSerializer(read_only=True)
+    company = CompanySerializer(read_only=True)
+
+    class Meta:
+        model = EmployerProfile
+        fields = ['id', 'user', 'full_name', 'employee_id', 'company', 'created_at', 'updated_at']
+
+
+# EmployerProfile Write Serializer — updated (no company_name)
+class EmployerProfileWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmployerProfile
+        fields = ['full_name', 'employee_id', 'company']
+
+    def validate_employee_id(self, value):
+        # Prevent duplicate employee IDs
+        if EmployerProfile.objects.filter(employee_id=value).exclude(id=self.instance.id).exists():
+            raise serializers.ValidationError("This Employee ID is already in use.")
+        return value
+
+    def validate_company(self, value):
+        if value and not value.is_active:
+            raise serializers.ValidationError("Cannot link to an inactive company.")
+        return value
+
+
+# Job Read Serializer — no change needed
 class JobReadSerializer(serializers.ModelSerializer):
     company = CompanySerializer(read_only=True)
     posted_by = serializers.CharField(source='posted_by.username', read_only=True, default='Company Jobs')
-    industry_type = serializers.JSONField()
-    department = serializers.JSONField()
-    work_type = serializers.CharField()
-    applicants_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Job
@@ -276,42 +279,137 @@ class JobReadSerializer(serializers.ModelSerializer):
             'job_type', 'industry_type', 'experience_required', 'work_type',
             'salary', 'description', 'responsibilities', 'key_skills',
             'education_required', 'tags', 'department', 'shift', 'duration',
-            'openings', 'applicants_count', 'posted_date', 'posted_by'
+            'openings', 'applicants_count', 'posted_date', 'posted_by',
+            'is_active'
         ]
 
-
+# Job Serializer for CREATE (full validation)
 class JobWriteSerializer(serializers.ModelSerializer):
-    company = serializers.PrimaryKeyRelatedField(queryset=Company.objects.all(), required=False)
+    company = CompanySerializer(read_only=True)
+    posted_by = serializers.CharField(source='posted_by.username', read_only=True)
 
     class Meta:
         model = Job
-        fields = '__all__'
-        read_only_fields = ['id', 'posted_date', 'posted_by', 'applicants_count']
+        fields = [
+            'id', 'title', 'company', 'location',
+            'job_type', 'industry_type', 'experience_required', 'work_type',
+            'salary', 'description', 'responsibilities', 'key_skills',
+            'education_required', 'tags', 'department', 'shift', 'duration',
+            'openings', 'applicants_count', 'posted_date', 'posted_by',
+            'is_active'
+        ]
+        read_only_fields = ['id', 'company', 'posted_date', 'posted_by', 'applicants_count']
 
     def validate(self, data):
-        if not data.get('company'):
-            raise serializers.ValidationError({"company": "Company is required."})
+        user = self.context['request'].user
+        if not hasattr(user, 'employer_profile'):
+            raise serializers.ValidationError("Only employers can create/update jobs.")
+        
+        employer_profile = user.employer_profile
+        if not employer_profile.company:
+            raise serializers.ValidationError(
+                "You must create or link a company in your profile before posting jobs."
+            )
+
+        # For CREATE: title must be unique per company
+        title = data.get('title')
+        if title and Job.objects.filter(
+            company=employer_profile.company,
+            title__iexact=title
+        ).exists():
+            raise serializers.ValidationError(
+                {"title": f"A job with title '{title}' already exists for this company."}
+            )
+
         return data
 
+    def create(self, validated_data):
+        validated_data['posted_by'] = self.context['request'].user
+        employer_profile = self.context['request'].user.employer_profile
+        validated_data['company'] = employer_profile.company
+        return super().create(validated_data)
 
 
-# Job Application & Saved Job
+# NEW: Separate serializer for UPDATE (PATCH/PUT) - fields optional
+class JobUpdateSerializer(serializers.ModelSerializer):
+    company = CompanySerializer(read_only=True)
+    posted_by = serializers.CharField(source='posted_by.username', read_only=True)
 
+    class Meta:
+        model = Job
+        fields = [
+            'id', 'title', 'company', 'location',
+            'job_type', 'industry_type', 'experience_required', 'work_type',
+            'salary', 'description', 'responsibilities', 'key_skills',
+            'education_required', 'tags', 'department', 'shift', 'duration',
+            'openings', 'applicants_count', 'posted_date', 'posted_by',
+            'is_active'
+        ]
+        read_only_fields = ['id', 'company', 'posted_date', 'posted_by', 'applicants_count']
 
-class JobApplicationSerializer(serializers.ModelSerializer):
+    def validate(self, data):
+        user = self.context['request'].user
+        if not hasattr(user, 'employer_profile'):
+            raise serializers.ValidationError("Only employers can update jobs.")
+        
+        # Optional: only check title uniqueness if title is being changed
+        title = data.get('title')
+        if title:
+            instance = self.instance
+            if Job.objects.filter(
+                company=instance.company,
+                title__iexact=title
+            ).exclude(id=instance.id).exists():
+                raise serializers.ValidationError(
+                    {"title": f"A job with title '{title}' already exists for this company."}
+                )
+
+        return data
+
+# JobApplication & SavedJob — no change needed
+class JobApplicationWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobApplication
-        fields = '__all__'
-        read_only_fields = ['id', 'applied_date', 'user']
+        fields = ['job', 'cover_letter']
+        read_only_fields = ['id', 'applied_date', 'user', 'status', 'resume_version']
+
+    def validate(self, data):
+        if not hasattr(self.context['request'].user, 'jobseeker_profile'):
+            raise serializers.ValidationError("Only jobseekers can apply.")
+        return data
+
+    def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user
+        validated_data['status'] = JobApplication.Status.APPLIED
+        profile = self.context['request'].user.jobseeker_profile
+        if profile.resume_file:
+            validated_data['resume_version'] = profile.resume_file
+        return super().create(validated_data)
 
 
 class SavedJobSerializer(serializers.ModelSerializer):
     class Meta:
         model = SavedJob
-        fields = '__all__'
+        fields = ['job']
         read_only_fields = ['id', 'saved_date', 'user']
 
+class JobApplicationListSerializer(serializers.ModelSerializer):
+    job = JobReadSerializer(read_only=True)
 
+    class Meta:
+        model = JobApplication
+        fields = ['id', 'job', 'applied_date', 'status', 'cover_letter']
+        read_only_fields = ['id', 'applied_date', 'status']
+
+
+class JobApplicationEmployerSerializer(serializers.ModelSerializer):
+    job = JobReadSerializer(read_only=True)
+    user = UserReadSerializer(read_only=True)
+
+    class Meta:
+        model = JobApplication
+        fields = ['id', 'job', 'user', 'applied_date', 'status', 'cover_letter']
+        read_only_fields = ['id', 'applied_date']
 
 # Other Models
 

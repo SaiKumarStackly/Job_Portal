@@ -99,27 +99,7 @@ class JobSeekerProfile(models.Model):
         return f"Job Seeker: {self.user.email}"
 
 
-class EmployerProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='employer_profile')
 
-    company_name = models.CharField(max_length=200)  # Required during employer registration
-    company_id = models.CharField(max_length=50, unique=True, default=uuid.uuid4)
-    logo = models.ImageField(upload_to='company_logos/', null=True, blank=True)
-    slogan = models.CharField(max_length=200, blank=True)
-    ratings = models.DecimalField(max_digits=3, decimal_places=1, default=0.0)
-    review_count = models.IntegerField(default=0)
-    description = models.TextField(blank=True)
-    website = models.URLField(blank=True, null=True)
-    industry = models.CharField(max_length=150, blank=True)
-    employee_count = models.IntegerField(null=True, blank=True)
-    founded_year = models.PositiveIntegerField(null=True, blank=True)
-    company_address = models.TextField(blank=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"Employer: {self.company_name}"
 
 
 class AdminProfile(models.Model):
@@ -317,15 +297,61 @@ class Certification(models.Model):
 
 
 class Company(models.Model):
+    custom_id = models.CharField(
+        max_length=20,
+        unique=True,
+        blank=True,
+        help_text="Custom ID like CMP-001, STA001 (auto-generated if empty)"
+    )
     name = models.CharField(max_length=200, unique=True)
     logo = models.ImageField(upload_to='company_logos/', null=True, blank=True)
-    rating = models.DecimalField(max_digits=3, decimal_places=1, default=0)
+    slogan = models.CharField(max_length=200, blank=True)
+    rating = models.DecimalField(max_digits=3, decimal_places=1, default=0.0)
     review_count = models.IntegerField(default=0)
     description = models.TextField(blank=True)
     website = models.URLField(blank=True, null=True)
+    industry = models.CharField(max_length=150, blank=True)
+    employee_count = models.IntegerField(null=True, blank=True)
+    founded_year = models.PositiveIntegerField(null=True, blank=True)
+    company_address = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True, help_text="Admin can disable company")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if not self.custom_id:
+            # Auto-generate custom ID (CMP-001, CMP-002, ...)
+            last = Company.objects.order_by('id').last()
+            next_num = 1 if not last or not last.custom_id else int(last.custom_id.split('-')[-1]) + 1
+            self.custom_id = f"CMP-{next_num:03d}"
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.custom_id})"
+
+
+# EmployerProfile — clean & minimal
+class EmployerProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='employer_profile')
+
+    full_name = models.CharField(max_length=200, blank=True)           # ← personal name
+    employee_id = models.CharField(max_length=50, blank=True, unique=True)  # ← optional staff ID
+
+    company = models.ForeignKey(
+        'Company',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='employers'
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        company_str = self.company.name if self.company else "No Company"
+        return f"Employer: {self.full_name or self.user.email} - {company_str}"
 
 
 class Job(models.Model):
@@ -375,8 +401,9 @@ class Job(models.Model):
     duration = models.CharField(max_length=100, blank=True)
     openings = models.IntegerField(default=1)
     applicants_count = models.IntegerField(default=0)
-    posted_date = models.DateField(default=timezone.now)
+    posted_date = models.DateTimeField(default=timezone.now)
     posted_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='posted_jobs')
+    is_active = models.BooleanField(default=True, help_text="Whether this job is currently active and visible")
 
     def __str__(self):
         return f"{self.title} - {self.company.name}"
