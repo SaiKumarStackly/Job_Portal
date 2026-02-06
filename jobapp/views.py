@@ -13,7 +13,8 @@ from .serializers import (
     JobSeekerProfileWriteSerializer,
     EmployerProfileReadSerializer,
     EmployerProfileWriteSerializer,
-    UserReadSerializer  
+    UserReadSerializer  ,
+    JobApplicationDetailSerializer
 )
 
 
@@ -262,10 +263,18 @@ class JobToggleActiveView(generics.UpdateAPIView):
 
 class ApplyJobView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = JobApplicationWriteSerializer
+    serializer_class = JobApplicationWriteSerializer  # keep this for validation/input
 
-    def perform_create(self, serializer):
-        serializer.save()
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
+
+        # Use the FULL detail serializer for response
+        detail_serializer = JobApplicationDetailSerializer(instance)
+        headers = self.get_success_headers(serializer.data)
+        
+        return Response(detail_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class AppliedJobsListView(generics.ListAPIView):
@@ -290,8 +299,24 @@ class SavedJobsListView(generics.ListAPIView):
 
     def get_queryset(self):
         return SavedJob.objects.filter(user=self.request.user)
+class WithdrawApplicationView(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = JobApplicationDetailSerializer  # ← use full serializer
+    queryset = JobApplication.objects.all()
 
+    def get_queryset(self):
+        return JobApplication.objects.filter(user=self.request.user)
 
+    def perform_update(self, serializer):
+        application = serializer.instance
+        if application.status == JobApplication.Status.WITHDRAWN:
+            raise ValidationError("Application is already withdrawn.")
+        
+        application.status = JobApplication.Status.WITHDRAWN
+        application.save()
+        
+        # Return full updated details
+        return Response(JobApplicationDetailSerializer(application).data)
 
 # Employer: Applications for their jobs
 
@@ -306,3 +331,21 @@ class EmployerApplicationsListView(generics.ListAPIView):
         # Jobs posted by this employer
         jobs = Job.objects.filter(posted_by=user)
         return JobApplication.objects.filter(job__in=jobs)
+    
+# Employer: Change application status
+class EmployerApplicationStatusUpdateView(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = JobApplicationEmployerSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if not hasattr(user, 'employer_profile'):
+            return JobApplication.objects.none()
+        employer_company = user.employer_profile.company
+        if not employer_company:
+            return JobApplication.objects.none()
+        jobs = Job.objects.filter(company=employer_company)
+        return JobApplication.objects.filter(job__in=jobs)
+
+    def perform_update(self, serializer):
+        serializer.save()

@@ -307,8 +307,8 @@ class Company(models.Model):
     logo = models.ImageField(upload_to='company_logos/', null=True, blank=True)
     slogan = models.CharField(max_length=200, blank=True)
     rating = models.DecimalField(max_digits=3, decimal_places=1, default=0.0)
+    company_overview = models.TextField(blank=True)
     review_count = models.IntegerField(default=0)
-    description = models.TextField(blank=True)
     website = models.URLField(blank=True, null=True)
     industry = models.CharField(max_length=150, blank=True)
     employee_count = models.IntegerField(null=True, blank=True)
@@ -392,6 +392,7 @@ class Job(models.Model):
     work_type = models.CharField(max_length=20, choices=WorkType.choices, blank=True)
     salary = models.CharField(max_length=100, blank=True)
     description = models.TextField()
+    job_highlights = models.JSONField(default=list, blank=True)
     responsibilities = models.JSONField(default=list, blank=True)
     key_skills = models.JSONField(default=list, blank=True)
     education_required = models.JSONField(default=list, blank=True)
@@ -408,12 +409,13 @@ class Job(models.Model):
     def __str__(self):
         return f"{self.title} - {self.company.name}"
 
-
 class JobApplication(models.Model):
     class Status(models.TextChoices):
         APPLIED = 'applied', 'Applied'
+        RESUME_SCREENING = 'resume_screening', 'Resume Screening'
+        RECRUITER_REVIEW = 'recruiter_review', 'Recruiter Review'
         SHORTLISTED = 'shortlisted', 'Shortlisted'
-        INTERVIEW = 'interview', 'Interview Stage'
+        INTERVIEW_CALLED = 'interview_called', 'Interview Called'
         OFFERED = 'offered', 'Offered'
         REJECTED = 'rejected', 'Rejected'
         HIRED = 'hired', 'Hired'
@@ -427,7 +429,9 @@ class JobApplication(models.Model):
     resume_version = models.FileField(upload_to='application_resumes/', null=True, blank=True)
 
     class Meta:
-        unique_together = ['user', 'job']
+        indexes = [
+            models.Index(fields=['user', 'job']),
+        ]
 
     def __str__(self):
         return f"{self.user.email} → {self.job.title}"

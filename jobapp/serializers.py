@@ -228,7 +228,7 @@ class CompanySerializer(serializers.ModelSerializer):
         fields = [
             'id', 'custom_id', 'name', 'logo', 'logo_url',
             'slogan', 'rating', 'review_count',
-            'description', 'website', 'industry',
+            'company_overview', 'website', 'industry',
             'employee_count', 'founded_year', 'company_address',
             'is_active'
         ]
@@ -285,7 +285,7 @@ class JobReadSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'company', 'location',
             'job_type', 'industry_type', 'experience_required', 'work_type',
-            'salary', 'description', 'responsibilities', 'key_skills',
+            'salary', 'description', 'responsibilities', 'job_highlights', 'key_skills',
             'education_required', 'tags', 'department', 'shift', 'duration',
             'openings', 'applicants_count', 'posted_date', 'posted_by',
             'is_active'
@@ -301,7 +301,7 @@ class JobWriteSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'company', 'location',
             'job_type', 'industry_type', 'experience_required', 'work_type',
-            'salary', 'description', 'responsibilities', 'key_skills',
+            'salary', 'description', 'responsibilities','job_highlights','key_skills',
             'education_required', 'tags', 'department', 'shift', 'duration',
             'openings', 'applicants_count', 'posted_date', 'posted_by',
             'is_active'
@@ -384,6 +384,31 @@ class JobApplicationWriteSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if not hasattr(self.context['request'].user, 'jobseeker_profile'):
             raise serializers.ValidationError("Only jobseekers can apply.")
+
+        user = self.context['request'].user
+        job = data.get('job')
+
+        # Check if there is already an ACTIVE application
+        active_statuses = [
+            JobApplication.Status.APPLIED,
+            JobApplication.Status.RESUME_SCREENING,
+            JobApplication.Status.RECRUITER_REVIEW,
+            JobApplication.Status.SHORTLISTED,
+            JobApplication.Status.INTERVIEW_CALLED,
+            JobApplication.Status.OFFERED,
+            JobApplication.Status.HIRED
+        ]
+
+        if JobApplication.objects.filter(
+            user=user,
+            job=job,
+            status__in=active_statuses
+        ).exists():
+            raise serializers.ValidationError(
+                "You already have an active application for this job. "
+                "Please wait for a response or withdraw the existing one."
+            )
+
         return data
 
     def create(self, validated_data):
@@ -393,6 +418,19 @@ class JobApplicationWriteSerializer(serializers.ModelSerializer):
         if profile.resume_file:
             validated_data['resume_version'] = profile.resume_file
         return super().create(validated_data)
+
+# NEW: Full read serializer for JobApplication (used after create)
+class JobApplicationDetailSerializer(serializers.ModelSerializer):
+    job = JobReadSerializer(read_only=True)
+    user = UserReadSerializer(read_only=True)
+
+    class Meta:
+        model = JobApplication
+        fields = [
+            'id', 'job', 'user', 'applied_date', 'status',
+            'cover_letter', 'resume_version'
+        ]
+        read_only_fields = ['id', 'applied_date', 'user', 'status']
 
 
 class SavedJobSerializer(serializers.ModelSerializer):
