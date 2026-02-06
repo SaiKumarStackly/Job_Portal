@@ -47,9 +47,14 @@ urlpatterns = [
     path('jobs/save/', views.SaveJobView.as_view(), name='job-save'),
     path('jobs/saved/', views.SavedJobsListView.as_view(), name='saved-jobs'),
 
+    #Withdraw application
     path('jobs/applications/<int:pk>/withdraw/', views.WithdrawApplicationView.as_view(), name='withdraw-application'),
 
     # Employer sees applications
     path('jobs/applications/', views.EmployerApplicationsListView.as_view(), name='employer-applications'),
     path('jobs/applications/<int:pk>/status/', views.EmployerApplicationStatusUpdateView.as_view(), name='employer-application-status-update'),
+
+    # Notifications
+    path('notifications/', views.NotificationListView.as_view(), name='notification-list'),
+    path('notifications/<int:pk>/read/', views.MarkNotificationReadView.as_view(), name='mark-notification-read'),
 ]

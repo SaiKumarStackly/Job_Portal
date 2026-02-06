@@ -470,5 +470,5 @@ class NewsletterSubscriberSerializer(serializers.ModelSerializer):
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
-        fields = '__all__'
-        read_only_fields = ['id', 'created_at', 'user']
+        fields = ['id', 'message', 'created_at', 'is_read']
+        read_only_fields = ['id', 'created_at']

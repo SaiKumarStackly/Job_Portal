@@ -14,7 +14,8 @@ from .serializers import (
     EmployerProfileReadSerializer,
     EmployerProfileWriteSerializer,
     UserReadSerializer  ,
-    JobApplicationDetailSerializer
+    JobApplicationDetailSerializer,
+    NotificationSerializer
 )
 
 
@@ -92,11 +93,13 @@ class EmployerProfileView(generics.RetrieveUpdateAPIView):
             raise ValidationError("You are not an employer.")
         return self.request.user.employer_profile
     
+
+    
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from .models import Company, Job, JobApplication, SavedJob
+from .models import Company, Job, JobApplication, SavedJob, Notification
 from .serializers import (
     CompanySerializer, JobReadSerializer, JobWriteSerializer,
     JobApplicationWriteSerializer, SavedJobSerializer,
@@ -270,6 +273,14 @@ class ApplyJobView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
 
+        # Notify the employer 
+        job = instance.job
+        if job.posted_by and hasattr(job.posted_by, 'employer_profile'):
+            Notification.objects.create(
+                user=job.posted_by,
+                message=f"New application received for '{job.title}' from {request.user.email}"
+            )
+
         # Use the FULL detail serializer for response
         detail_serializer = JobApplicationDetailSerializer(instance)
         headers = self.get_success_headers(serializer.data)
@@ -299,6 +310,7 @@ class SavedJobsListView(generics.ListAPIView):
 
     def get_queryset(self):
         return SavedJob.objects.filter(user=self.request.user)
+
 class WithdrawApplicationView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = JobApplicationDetailSerializer  # ← use full serializer
@@ -341,11 +353,64 @@ class EmployerApplicationStatusUpdateView(generics.UpdateAPIView):
         user = self.request.user
         if not hasattr(user, 'employer_profile'):
             return JobApplication.objects.none()
+        
         employer_company = user.employer_profile.company
         if not employer_company:
             return JobApplication.objects.none()
+        
+        # All applications for jobs in this company
         jobs = Job.objects.filter(company=employer_company)
         return JobApplication.objects.filter(job__in=jobs)
 
     def perform_update(self, serializer):
-        serializer.save()
+        application = serializer.instance
+        old_status = application.status
+        
+        # Get new status from request data
+        new_status = self.request.data.get('status')
+        if not new_status:
+            raise ValidationError({"status": "This field is required to update status."})
+        
+        if new_status not in [choice[0] for choice in JobApplication.Status.choices]:
+            raise ValidationError({"status": f"Invalid status. Valid choices: {', '.join([c[0] for c in JobApplication.Status.choices])}"})
+        
+        # Prevent changing to same status (optional)
+        if new_status == old_status:
+            raise ValidationError({"status": "Application is already in this status."})
+        
+        # Update status
+        application.status = new_status
+        application.save()
+
+        # Create notification for jobseeker
+        Notification.objects.create(
+            user=application.user,
+            message=f"Your application for '{application.job.title}' has been updated to: {new_status.replace('_', ' ').title()}"
+        )
+
+        # Return full updated application
+        return Response(JobApplicationEmployerSerializer(application).data)
+
+# ────────────────────────────────────────────────
+# Notifications
+# ────────────────────────────────────────────────
+
+class NotificationListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = NotificationSerializer
+
+    def get_queryset(self):
+        return Notification.objects.filter(user=self.request.user)
+
+
+class MarkNotificationReadView(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = NotificationSerializer
+    queryset = Notification.objects.all()
+
+    def get_queryset(self):
+        return Notification.objects.filter(user=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.instance.is_read = True
+        serializer.instance.save()
