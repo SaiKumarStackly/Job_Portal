@@ -58,7 +58,7 @@ class JobSeekerRegistrationSerializer(UserRegistrationSerializer):
         return user
 
 
-# Employer Registration — no company_name, no full_name
+# Employer Registration 
 class EmployerRegistrationSerializer(UserRegistrationSerializer):
     class Meta(UserRegistrationSerializer.Meta):
         fields = UserRegistrationSerializer.Meta.fields

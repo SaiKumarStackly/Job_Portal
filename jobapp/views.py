@@ -391,9 +391,8 @@ class EmployerApplicationStatusUpdateView(generics.UpdateAPIView):
         # Return full updated application
         return Response(JobApplicationEmployerSerializer(application).data)
 
-# ────────────────────────────────────────────────
 # Notifications
-# ────────────────────────────────────────────────
+
 
 class NotificationListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]

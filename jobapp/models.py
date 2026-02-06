@@ -59,7 +59,7 @@ class JobSeekerProfile(models.Model):
         blank=True
     )
     current_location = models.CharField(max_length=200, blank=True)
-    preferred_locations = models.TextField(blank=True)  # comma separated or JSON later
+    preferred_locations = models.TextField(blank=True)  # comma separated 
 
     # Contact Details
     alternate_phone = models.CharField(max_length=15, blank=True, null=True)
@@ -331,7 +331,7 @@ class Company(models.Model):
         return f"{self.name} ({self.custom_id})"
 
 
-# EmployerProfile — clean & minimal
+# EmployerProfile 
 class EmployerProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='employer_profile')
 
