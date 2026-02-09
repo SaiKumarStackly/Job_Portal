@@ -12,6 +12,70 @@ from .models import (
 
 User = get_user_model()
 
+# serializers.py
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.contrib.auth import authenticate
+from .models import User
+from . import models
+from django.db.models import Q
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    default_error_messages = {
+        'no_active_account': 'No active account found with the given credentials'
+    }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Allow both fields
+        self.fields['email'] = serializers.CharField(required=False)
+        self.fields['username'] = serializers.CharField(required=False)
+
+    def validate(self, attrs):
+        # Get login value from either field
+        login_value = attrs.get('username') or attrs.get('email')
+        password = attrs.get('password')
+
+        if not login_value:
+            raise serializers.ValidationError(
+                {"detail": "Must provide either 'username' or 'email'."}
+            )
+
+        if not password:
+            raise serializers.ValidationError(
+                {"detail": "Password is required."}
+            )
+
+        # Try to authenticate
+        user = authenticate(
+            request=self.context.get('request'),
+            username=login_value,  # Django auth backend uses username internally
+            password=password
+        )
+
+        if user is None:
+            # Check if user exists (better error messages)
+            exists = User.objects.filter(
+                Q(email__iexact=login_value) | Q(username__iexact=login_value)
+            ).exists()
+
+            if not exists:
+                raise serializers.ValidationError({
+                    "detail": "No account found with this email or username."
+                })
+            else:
+                raise serializers.ValidationError({
+                    "detail": "Incorrect password."
+                })
+
+        if not user.is_active:
+            raise serializers.ValidationError({
+                "detail": "This account is inactive."
+            })
+
+        # Success - map to username for JWT
+        attrs['username'] = user.username
+        return super().validate(attrs)
+
 # User Serializers
 
 class UserReadSerializer(serializers.ModelSerializer):

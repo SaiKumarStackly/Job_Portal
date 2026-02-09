@@ -15,7 +15,7 @@ from .serializers import (
     EmployerProfileWriteSerializer,
     UserReadSerializer  ,
     JobApplicationDetailSerializer,
-    NotificationSerializer
+    NotificationSerializer ,CustomTokenObtainPairSerializer
 )
 
 
@@ -47,9 +47,12 @@ class EmployerRegistrationView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import CustomTokenObtainPairSerializer
+
 class LoginView(TokenObtainPairView):
     permission_classes = [AllowAny]
-
+    serializer_class = CustomTokenObtainPairSerializer
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
